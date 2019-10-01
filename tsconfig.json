@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "rootDir": "./",
+    "moduleResolution": "node",
+    "target": "es2015",
+    "downlevelIteration": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "sourceMap": false,
+    "noEmitOnError": false,
+    "experimentalDecorators": true,
+    "noUnusedParameters": true,
+    "noUnusedLocals": true,
+    "importHelpers": true,
+    "lib": ["dom", "es2015"]
+  },
+  "include": ["./**/*.ts", "./**/*.tsx"],
+  "exclude": ["./node_modules", "./dist"]
+}

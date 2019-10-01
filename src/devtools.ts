@@ -1,12 +1,15 @@
+import * as d3 from "d3";
+import * as flamegraph from "d3-flame-graph";
+import "d3-flame-graph/dist/d3-flamegraph.css";
+
 chrome.devtools.panels.create("Shopify",
   "shopify.png",
-  "devtools.html",
-  null,
+  "devtools.html"
 );
 
-function onClick(d) {
-  console.info("Clicked on " + d.data.name);
-}
+// function onClick(d) {
+//   console.info("Clicked on " + d.data.name);
+// }
 
 function cleanLiquidProfileData(entries) {
   return entries.map(function (entry){
@@ -18,7 +21,7 @@ function cleanLiquidProfileData(entries) {
   });
 }
 
-chrome.devtools.inspectedWindow.eval(`document.getElementById('liquidProfileData').innerHTML`, function(result) {
+chrome.devtools.inspectedWindow.eval(`document.getElementById('liquidProfileData').innerHTML`, function(result: string) {
   var data = JSON.parse(result);
   var cleanData = {
     name: data.name,
@@ -29,7 +32,7 @@ chrome.devtools.inspectedWindow.eval(`document.getElementById('liquidProfileData
   }
 
   cleanData.children = cleanData.children.flat();
-  var flameGraph = d3.flamegraph()
+  var flameGraph = flamegraph()
   .width(600);
   
   var details = document.getElementById("details");
