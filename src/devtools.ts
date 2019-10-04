@@ -1,43 +1,47 @@
-import * as d3 from 'd3';
-import * as flamegraph from 'd3-flame-graph';
+// import * as d3 from 'd3';
+// import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
 
-chrome.devtools.panels.create('Shopify', 'shopify.png', 'devtools.html');
+chrome.devtools.panels.create(
+  'Shopify',
+  'images/shopify16.png',
+  'devtools.html',
+);
 
 // function onClick(d) {
 //   console.info("Clicked on " + d.data.name);
 // }
 
-function cleanLiquidProfileData(entries) {
-  return entries.map(function(entry) {
-    return {
-      name: `${entry.partial} ${entry.code} (line#${entry.line_number})`,
-      value: entry.total_time,
-      children: cleanLiquidProfileData(entry.children),
-    };
-  });
-}
+// function cleanLiquidProfileData(entries) {
+//   return entries.map(function(entry) {
+//     return {
+//       name: `${entry.partial} ${entry.code} (line#${entry.line_number})`,
+//       value: entry.total_time,
+//       children: cleanLiquidProfileData(entry.children),
+//     };
+//   });
+// }
 
-chrome.devtools.inspectedWindow.eval(
-  `document.getElementById('liquidProfileData').innerHTML`,
-  function(result: string) {
-    const data = JSON.parse(result);
-    const cleanData = {
-      name: data.name,
-      value: data.value,
-      children: data.children.map(element => {
-        return cleanLiquidProfileData(element);
-      }),
-    };
+// chrome.devtools.inspectedWindow.eval(
+//   `document.getElementById('liquidProfileData').innerHTML`,
+//   function(result: string) {
+//     const data = JSON.parse(result);
+//     const cleanData = {
+//       name: data.name,
+//       value: data.value,
+//       children: data.children.map(element => {
+//         return cleanLiquidProfileData(element);
+//       }),
+//     };
 
-    cleanData.children = cleanData.children.flat();
-    const flameGraph = flamegraph().width(600);
+//     cleanData.children = cleanData.children.flat();
+//     const flameGraph = flamegraph().width(600);
 
-    const details = document.getElementById('details');
-    flameGraph.setDetailsElement(details);
+//     const details = document.getElementById('details');
+//     flameGraph.setDetailsElement(details);
 
-    d3.select('#chart')
-      .datum(cleanData)
-      .call(flameGraph);
-  },
-);
+//     d3.select('#chart')
+//       .datum(cleanData)
+//       .call(flameGraph);
+//   },
+// );

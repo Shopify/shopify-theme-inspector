@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "eslint '**/*.{ts,tsx}'",
     "test": "jest",
-    "test:watch" : "jest --watch",
+    "test:watch": "jest --watch",
     "build": "webpack --config webpack.prod.js",
     "start": "webpack --config webpack.dev.js"
   },

@@ -1,0 +1,21 @@
+{
+  "name": "Getting Started Example",
+  "version": "1.0",
+  "description": "Build an Extension!",
+  "devtools_page": "dist/devtools.html",
+  "permissions": ["declarativeContent", "storage"],
+  "background": {
+    "scripts": ["dist/background.js"],
+    "persistent": false
+  },
+  "page_action": {
+    "default_popup": "dist/popup.html",
+    "default_icon": {
+      "16": "src/images/shopify16.png",
+      "32": "src/images/shopify32.png",
+      "48": "src/images/shopify48.png",
+      "128": "src/images/shopify128.png"
+    }
+  },
+  "manifest_version": 2
+}
