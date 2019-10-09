@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/Shopify/shopify-devtools#readme",
   "dependencies": {
+    "copy-webpack-plugin": "^5.0.4",
     "d3": "^5.12.0",
     "d3-flame-graph": "^2.1.2"
   },
