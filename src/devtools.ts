@@ -18,12 +18,19 @@ chrome.devtools.inspectedWindow.eval('window.location.href', function(
   result: string,
 ) {
   const url = result;
-  const xhr = new XMLHttpRequest();
-  xhr.open('GET', `${url}/.json?profile_liquid`, true);
-  xhr.onload = function() {
-    if (xhr.readyState === 4) {
-      if (xhr.status === 200) {
-        const data = JSON.parse(xhr.response);
+  const request = new XMLHttpRequest();
+  request.responseType = 'document';
+  request.open('GET', `${url}?profile_liquid`, true);
+  request.onload = function() {
+    if (request.readyState === 4) {
+      if (request.status === 200) {
+        let data;
+        const scriptTag = request.responseXML!.querySelector(
+          '#liquidProfileData',
+        );
+        if (scriptTag !== null) {
+          data = JSON.parse(scriptTag.innerHTML);
+        }
         const cleanData = {
           name: data.name,
           value: data.value,
@@ -39,12 +46,12 @@ chrome.devtools.inspectedWindow.eval('window.location.href', function(
           .datum(cleanData)
           .call(flameGraph);
       } else {
-        console.error(xhr.statusText);
+        console.error(request.statusText);
       }
     }
   };
-  xhr.onerror = function() {
-    console.error(xhr.statusText);
+  request.onerror = function() {
+    console.error(request.statusText);
   };
-  xhr.send(null);
+  request.send(null);
 });
