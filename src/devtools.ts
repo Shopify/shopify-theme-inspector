@@ -1,77 +1,42 @@
-import * as d3 from 'd3';
-import * as flamegraph from 'd3-flame-graph';
-import 'd3-flame-graph/dist/d3-flamegraph.css';
-// import './panel.css';
-// import './main.css';
+import Toolbar from './components/toolbar';
+import LiquidFlamegraph from './components/liquid-flamegraph';
+import {domHelpers, getProfileData} from './utils';
 
-chrome.devtools.panels.create('Shopify', '', './devtools.html', function() {
-  return displayFlameGraph();
-});
+import './styles/main.css';
 
-function formatLiquidProfileData(entries) {
-  return entries.map(function(entry) {
-    return {
-      name: `${entry.partial} ${entry.code} (line#${entry.line_number})`,
-      value: entry.total_time,
-      children: formatLiquidProfileData(entry.children),
-    };
-  });
-}
+const selectors = {
+  refreshButton: '[data-refresh-button]',
+  flamegraphContainer: '[data-flamegraph-container]',
+  loadingAnimation: '[data-loading-animation]',
+  initialMessage: '[data-initial-message]',
+};
 
-function getProfileURL(): Promise<string> {
-  return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval('window.location.href', function(
-      result: string,
-    ) {
-      resolve(result);
-    });
-  });
-}
+const toolbar = new Toolbar();
+let liquidFlamegraph: LiquidFlamegraph;
 
-async function getProfileData() {
-  const url = new URL(await getProfileURL());
-  url.searchParams.set('profile_liquid', 'true');
-  const response = await fetch(url.href);
-  const html = await response.text();
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(html, 'text/html');
-  if (doc === null) {
-    return;
-  }
-  const profileData = JSON.parse(
-    doc.querySelector('#liquidProfileData')!.innerHTML,
-  );
-  // eslint-disable-next-line consistent-return
-  return cleanProfileData(profileData);
-}
+chrome.devtools.panels.create('Shopify', '', './devtools.html');
 
-function cleanProfileData(
-  profileData: {name: any; value: any; children: any} | null,
-) {
-  let cleanData;
+toolbar.refreshButton.addEventListener('click', refreshPanel);
+toolbar.zoomOutButton.addEventListener('click', zoomOutFlamegraph);
 
-  if (profileData !== null) {
-    cleanData = {
-      name: profileData.name,
-      value: profileData.value,
-      children: formatLiquidProfileData(profileData.children),
-    };
-  }
-  return cleanData;
-}
-
-async function displayFlameGraph() {
+async function refreshPanel() {
+  document.querySelector(selectors.initialMessage)!.innerHTML = '';
+  domHelpers.toggleDisplay(selectors.loadingAnimation);
   const profile = await getProfileData();
+  domHelpers.toggleDisplay(selectors.loadingAnimation);
 
-  const flameGraph = flamegraph
-    .flamegraph()
-    .inverted(true)
-    .cellHeight(20);
+  liquidFlamegraph = new LiquidFlamegraph(
+    document.querySelector(selectors.flamegraphContainer),
+    profile,
+  );
 
-  const details = document.getElementById('details');
-  flameGraph.setDetailsElement(details);
+  setTimeout(function() {
+    domHelpers.setTotalTime(profile.value);
+  }, 300);
+}
 
-  d3.select('#chart')
-    .datum(profile)
-    .call(flameGraph);
+function zoomOutFlamegraph() {
+  if (typeof liquidFlamegraph.flamegraph !== 'undefined') {
+    liquidFlamegraph.flamegraph.resetZoom();
+  }
 }

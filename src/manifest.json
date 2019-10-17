@@ -1,20 +1,22 @@
 {
-  "name": "Getting Started Example",
+  "name": "Shopify",
   "version": "1.0",
-  "description": "Build an Extension!",
+  "description": "Profile and debug liquid on your shopify store",
   "devtools_page": "devtools.html",
-  "permissions": ["declarativeContent", "storage", "<all_urls>"],
+  "permissions": ["declarativeContent", "storage", "<all_urls>", "activeTab"],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
+  },
+  "icons": {
+    "48": "images/shopify48.png",
+    "128": "images/shopify128.png"
   },
   "page_action": {
     "default_popup": "popup.html",
     "default_icon": {
       "16": "images/shopify16.png",
-      "32": "images/shopify32.png",
-      "48": "images/shopify48.png",
-      "128": "images/shopify128.png"
+      "32": "images/shopify32.png"
     }
   },
   "manifest_version": 2
