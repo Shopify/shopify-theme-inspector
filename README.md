@@ -12,5 +12,5 @@ You should now be able to see this extension on your browser toolbar. On your lo
 ### Other requirements
 For this devtools to work for now there are some additional steps to the setup.
 1. Activate the `profile_liquid` beta flag for your local store.
-2. Use the `?profile_liquid` query param when accessing local store.
+2. Use the `?profile_liquid=true` query param when accessing local store.
 
