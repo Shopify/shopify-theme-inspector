@@ -11,13 +11,20 @@ const selectors = {
   initialMessage: '[data-initial-message]',
 };
 
-const toolbar = new Toolbar();
 let liquidFlamegraph: LiquidFlamegraph;
 
-chrome.devtools.panels.create('Shopify', '', './devtools.html');
+chrome.devtools.inspectedWindow.eval(
+  `typeof window.Shopify === 'object'`,
+  function(isShopifyStore: boolean) {
+    if (isShopifyStore) {
+      chrome.devtools.panels.create('Shopify', '', './devtools.html');
+      const toolbar = new Toolbar();
 
-toolbar.refreshButton.addEventListener('click', refreshPanel);
-toolbar.zoomOutButton.addEventListener('click', zoomOutFlamegraph);
+      toolbar.refreshButton.addEventListener('click', refreshPanel);
+      toolbar.zoomOutButton.addEventListener('click', zoomOutFlamegraph);
+    }
+  },
+);
 
 async function refreshPanel() {
   document.querySelector(selectors.initialMessage)!.innerHTML = '';
