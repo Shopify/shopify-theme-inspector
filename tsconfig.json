@@ -16,7 +16,8 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "importHelpers": true,
-    "lib": ["dom", "es2015"]
+    "lib": ["dom", "es2015"],
+    "strict": true,
   },
   "include": ["./**/*.ts", "./**/*.tsx"],
   "exclude": ["./node_modules", "./dist"]
