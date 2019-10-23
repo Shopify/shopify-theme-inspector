@@ -10,3 +10,12 @@ export function setTotalTime(totalTime) {
     Number(totalTime) * 1000,
   )}ms</b>`;
 }
+
+export function formatNodeTime(nodeTime) {
+  const nodeTimeMs = Math.trunc(nodeTime * 1000);
+  if (nodeTimeMs > 0) {
+    return nodeTimeMs;
+  } else {
+    return '< 1';
+  }
+}

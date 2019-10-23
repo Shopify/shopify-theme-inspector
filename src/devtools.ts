@@ -1,6 +1,6 @@
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
-import {domHelpers, getProfileData} from './utils';
+import {toggleDisplay, getProfileData, setTotalTime} from './utils';
 
 import './styles/main.css';
 
@@ -21,9 +21,9 @@ toolbar.zoomOutButton.addEventListener('click', zoomOutFlamegraph);
 
 async function refreshPanel() {
   document.querySelector(selectors.initialMessage)!.innerHTML = '';
-  domHelpers.toggleDisplay(selectors.loadingAnimation);
+  toggleDisplay(selectors.loadingAnimation);
   const profile = await getProfileData();
-  domHelpers.toggleDisplay(selectors.loadingAnimation);
+  toggleDisplay(selectors.loadingAnimation);
 
   liquidFlamegraph = new LiquidFlamegraph(
     document.querySelector(selectors.flamegraphContainer),
@@ -31,7 +31,7 @@ async function refreshPanel() {
   );
 
   setTimeout(function() {
-    domHelpers.setTotalTime(profile.value);
+    setTotalTime(profile.value);
   }, 300);
 }
 
