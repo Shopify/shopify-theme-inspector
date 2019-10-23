@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "../",
+    "rootDir": "../",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+  },
+  "include": ["**/*.test.ts","../src/types/**/*.ts"],
+}
