@@ -53,3 +53,9 @@ body {
   margin: 20px;
   font-size: 13px;
 }
+
+.code-snippet {
+  background-color: rgb(243, 243, 243);
+  border: 1px solid rgb(208, 208, 208);
+  padding: 4px;
+}

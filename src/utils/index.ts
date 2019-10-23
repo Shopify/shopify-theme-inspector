@@ -1,4 +1,4 @@
 import getProfileData from './getProfileData';
-import * as domHelpers from './domHelpers';
+import {toggleDisplay, setTotalTime, formatNodeTime} from './domHelpers';
 
-export {getProfileData, domHelpers};
+export {getProfileData, toggleDisplay, setTotalTime, formatNodeTime};

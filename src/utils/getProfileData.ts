@@ -41,6 +41,8 @@ function cleanProfileData(profileData: {name: any; value: any; children: any}) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,
+    code: '-',
+    line: '-',
     children: formatLiquidProfileData(profileData.children),
   };
   return cleanData;

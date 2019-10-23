@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
 import {debounce} from 'lodash';
+import {formatNodeTime} from '../utils';
 
 const selectors = {
   partial: '[data-partial]',
@@ -63,11 +64,11 @@ export default class LiquidFlamegraph {
 
     document.querySelector(
       selectors.nodeTime,
-    )!.innerHTML = `Total Time: ${node.value}`;
+    )!.innerHTML = `Total Time: <b>${formatNodeTime(node.value)}ms</b>`;
 
     document.querySelector(
       selectors.code,
-    )!.innerHTML = `Code snippet: ${node.data.code}`;
+    )!.innerHTML = `Code snippet: <i><span class="code-snippet">${node.data.code}</span></i>`;
 
     document.querySelector(
       selectors.line,
