@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
 import {debounce} from 'lodash';
-import {formatNodeTime} from '../utils';
+import {formatNodeTime, getThemeId, getURL} from '../utils';
 
 const selectors = {
   partial: '[data-partial]',
@@ -57,7 +57,7 @@ export default class LiquidFlamegraph {
     return window.innerWidth - 40;
   }
 
-  displayNodeDetails(node): void {
+  async displayNodeDetails(node) {
     document.querySelector(
       selectors.partial,
     )!.innerHTML = `File: ${node.data.name}`;
@@ -66,13 +66,27 @@ export default class LiquidFlamegraph {
       selectors.nodeTime,
     )!.innerHTML = `Total Time: <b>${formatNodeTime(node.value)}ms</b>`;
 
+    const clickableLink = await this.generateClickableLink(
+      node.data.name,
+      node.data.line,
+    );
+
     document.querySelector(
       selectors.code,
-    )!.innerHTML = `Code snippet: <i><span class="code-snippet">${node.data.code}</span></i>`;
+    )!.innerHTML = `Code snippet: <a href="${clickableLink}" target="_blank"><i><span class="code-snippet">${node.data.code}</span></i></a>`;
 
     document.querySelector(
       selectors.line,
     )!.innerHTML = `Line: ${node.data.line}`;
+  }
+
+  async generateClickableLink(fileName, lineNumber): Promise<any> {
+    const url = new URL(await getURL());
+    const hostname = url.hostname;
+    const themeId = await getThemeId();
+    const fileDetails = fileName.split(':');
+    const link = `https://${hostname}/admin/themes/${themeId}?key=${fileDetails[0]}s/${fileDetails[1]}.liquid&line=${lineNumber}`;
+    return link;
   }
 
   destroy() {

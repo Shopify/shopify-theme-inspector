@@ -1,7 +1,7 @@
-export default async function getProfileData() {
+export async function getProfileData() {
   let profileData;
   try {
-    const url = new URL(await getProfileURL());
+    const url = new URL(await getURL());
     url.searchParams.set('profile_liquid', 'true');
     const response = await fetch(url.href);
     const html = await response.text();
@@ -28,7 +28,7 @@ function formatLiquidProfileData(entries) {
   });
 }
 
-function getProfileURL(): Promise<string> {
+export function getURL(): Promise<string> {
   return new Promise(resolve => {
     chrome.devtools.inspectedWindow.eval(
       'window.location.href',
