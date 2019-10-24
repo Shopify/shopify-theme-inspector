@@ -1,3 +1,25 @@
+interface ProfileData {
+  name: string;
+  value: number;
+  children: ProfileNode[];
+}
+
+interface ProfileNode {
+  code: string;
+  partial: string;
+  // eslint-disable-next-line babel/camelcase
+  line_number: number;
+  // eslint-disable-next-line babel/camelcase
+  start_time: string;
+  // eslint-disable-next-line babel/camelcase
+  end_time: string;
+  // eslint-disable-next-line babel/camelcase
+  self_time: string;
+  // eslint-disable-next-line babel/camelcase
+  total_time: string;
+  children: ProfileNode[];
+}
+
 export async function getProfileData() {
   let profileData;
   try {
@@ -16,8 +38,8 @@ export async function getProfileData() {
   return cleanProfileData(profileData);
 }
 
-function formatLiquidProfileData(entries) {
-  return entries.map(function(entry) {
+function formatLiquidProfileData(entries: ProfileNode[]): any {
+  return entries.map(function(entry: ProfileNode) {
     return {
       name: `${entry.partial}`,
       value: entry.total_time,
@@ -37,7 +59,7 @@ export function getURL(): Promise<string> {
   });
 }
 
-function cleanProfileData(profileData: {name: any; value: any; children: any}) {
+function cleanProfileData(profileData: ProfileData) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,
