@@ -16,8 +16,10 @@ export async function getProfileData() {
   return cleanProfileData(profileData);
 }
 
-function formatLiquidProfileData(entries) {
-  return entries.map(function(entry) {
+function formatLiquidProfileData(
+  entries: ProfileNode[],
+): FormattedProfileNode[] {
+  return entries.map(function(entry: ProfileNode) {
     return {
       name: `${entry.partial}`,
       value: entry.total_time,
@@ -37,7 +39,7 @@ export function getURL(): Promise<string> {
   });
 }
 
-function cleanProfileData(profileData: {name: any; value: any; children: any}) {
+function cleanProfileData(profileData: ProfileData) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,

@@ -17,7 +17,10 @@ export default class LiquidFlamegraph {
   flamegraph: any;
   debouncedResize: any;
 
-  constructor(element, profile) {
+  constructor(element: HTMLDivElement | null, profile: object) {
+    if (!element) {
+      throw new TypeError('Element does not exist on page');
+    }
     this.element = element;
     this.profile = profile;
     this.flamegraph = this.create(this.curWindowWidth());
@@ -40,10 +43,10 @@ export default class LiquidFlamegraph {
       .inverted(true)
       .cellHeight(20)
       .width(flameGraphWidth)
-      .label(function(node) {
+      .label(function(node: FlamegraphNode) {
         return `${node.data.name} took ${node.value}s`;
       })
-      .onClick(node => {
+      .onClick((node: FlamegraphNode) => {
         this.displayNodeDetails(node);
       });
   }
@@ -57,7 +60,7 @@ export default class LiquidFlamegraph {
     return window.innerWidth - 40;
   }
 
-  async displayNodeDetails(node) {
+  async displayNodeDetails(node: FlamegraphNode) {
     document.querySelector(
       selectors.partial,
     )!.innerHTML = `File: ${node.data.name}`;
@@ -80,7 +83,10 @@ export default class LiquidFlamegraph {
     )!.innerHTML = `Line: ${node.data.line}`;
   }
 
-  async generateClickableLink(fileName, lineNumber): Promise<any> {
+  async generateClickableLink(
+    fileName: string,
+    lineNumber: number,
+  ): Promise<any> {
     const url = new URL(await getURL());
     const hostname = url.hostname;
     const themeId = await getThemeId();
