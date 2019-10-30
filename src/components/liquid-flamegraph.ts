@@ -11,25 +11,6 @@ const selectors = {
   line: '[data-line]',
 };
 
-interface FlamegraphNode {
-  children: FlamegraphNode[];
-  data: {
-    name: string;
-    value: number;
-    children: FlamegraphNode[];
-    code: string;
-    fade: boolean;
-    hide: boolean;
-    line: number;
-  };
-  parent: FlamegraphNode;
-  value: number;
-  x0: number;
-  x1: number;
-  y0: number;
-  y1: number;
-}
-
 export default class LiquidFlamegraph {
   element: HTMLDivElement;
   profile: object;
