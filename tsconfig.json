@@ -18,7 +18,7 @@
     "importHelpers": true,
     "lib": ["dom", "es2015"],
     "strict": true,
+    "allowSyntheticDefaultImports": true,
   },
-  "include": ["./**/*.ts", "./**/*.tsx"],
-  "exclude": ["./node_modules", "./dist"]
+  "include": ["./src/**/*.ts"],
 }
