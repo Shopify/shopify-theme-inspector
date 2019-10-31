@@ -5,7 +5,7 @@ const evalCondition = `
     cb(true)
   }`;
 
-export function setDevtoolsEval(page) {
+export function setDevtoolsEval(page: any) {
   return page.evaluateOnNewDocument(`
       window.chrome = window.chrome || {};
       window.chrome.devtools = window.chrome.devtools || {};
