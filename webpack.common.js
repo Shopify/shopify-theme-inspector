@@ -9,6 +9,7 @@ module.exports = {
     background: './src/background.ts',
     popup: './src/popup.ts',
     devtools: './src/devtools.ts',
+    detectShopify: './src/detectShopify.ts',
   },
   module: {
     rules: [
@@ -42,10 +43,10 @@ module.exports = {
       filename: 'popup.html',
       template: 'src/popup.html',
     }),
-    new CopyPlugin([
-      {from: 'src/manifest.json'},
-      {from: 'src/images', to: 'images'},
-    ]),
+    new CopyPlugin(
+      [{from: 'src/manifest.json'}, {from: 'src/images', to: 'images'}],
+      {copyUnmodified: true},
+    ),
   ],
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],

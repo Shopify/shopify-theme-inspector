@@ -8,7 +8,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "build": "webpack --config webpack.prod.js",
-    "start": "webpack --config webpack.dev.js"
+    "start": "webpack --config webpack.dev.js",
+    "zip": "yarn build && cd dist && zip -r -X ../shopify_devtools.zip ."
   },
   "engines": {
     "node": ">=10.16.3"
@@ -26,10 +27,13 @@
   "dependencies": {
     "@types/d3": "^5.7.2",
     "@types/jsdom": "^12.2.4",
+    "auth0-chrome": "^0.1.2",
     "copy-webpack-plugin": "^5.0.4",
     "d3": "^5.12.0",
     "d3-flame-graph": "^2.1.2",
-    "jsdom": "^15.2.0"
+    "jsdom": "^15.2.0",
+    "lodash": "^4.17.15",
+    "nullthrows": "^1.1.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.91",
