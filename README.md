@@ -14,6 +14,6 @@ Devtool to profile and visualize liquid performance.
 Click [here](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description)! for more contexts on flamegraphs and how to read them.
 
 ## Contributing
-To learn more about how to contribute to this project check out the [contributing]()! documentation.
+To learn more about how to contribute to this project check out the [contributing](https://github.com/Shopify/shopify-devtools/blob/master/CONTRIBUTING.md)! documentation.
 
 
