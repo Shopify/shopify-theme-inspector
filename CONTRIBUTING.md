@@ -50,9 +50,9 @@ See [Github's official documentation](https://help.github.com/articles/creating-
 
 ## Loading the extension locally and testing changes
 1. Run `yarn` and then `yarn build`.
-2. Navigate to `chrome://extensions` in your browser. You can also access this page by clicking on the Chrome menu on the top right side of the Omnibox, hovering over More Tools and selecting Extensions.
-3. Check the box next to Developer Mode.
-4. Click Load Unpacked Extension and select the `/dist` directory in the `shopify-devtools` folder.
+2. Navigate to `chrome://extensions` in your browser. You can also access this page by clicking on the Chrome menu on the top right side of the Omnibox, hovering over **More Tools** and selecting **Extensions**.
+3. Toggle **Developer Mode**.
+4. Click **Load Unpacked** Extension and select the `/dist` directory in the `shopify-devtools` folder.
 
-Now you should be able to actually test the changes you have made to the chrome extension locally. This ensures that you understand the effect your changes have and if you
-are satisfied with them. If you make any UI changes it is good practice to include screenshots outlining the changes to make it easier for the reviewer.
+You can now test the changes you have made to the Chrome extension locally.
+If you make any UI changes it is good practice to include screenshots outlining the changes to make it easier for the reviewer.
