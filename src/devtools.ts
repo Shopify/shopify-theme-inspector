@@ -9,6 +9,7 @@ const selectors = {
   flamegraphContainer: '[data-flamegraph-container]',
   loadingAnimation: '[data-loading-animation]',
   initialMessage: '[data-initial-message]',
+  documentBody: '[data-body]',
 };
 
 let liquidFlamegraph: LiquidFlamegraph;
@@ -28,9 +29,15 @@ chrome.devtools.inspectedWindow.eval(
 
 async function refreshPanel() {
   document.querySelector(selectors.initialMessage)!.innerHTML = '';
+  document
+    .querySelector(selectors.documentBody)!
+    .classList.toggle('partial-fade');
   toggleDisplay(selectors.loadingAnimation);
   const profile = await getProfileData();
   toggleDisplay(selectors.loadingAnimation);
+  document
+    .querySelector(selectors.documentBody)!
+    .classList.toggle('partial-fade');
 
   liquidFlamegraph = new LiquidFlamegraph(
     document.querySelector(selectors.flamegraphContainer),

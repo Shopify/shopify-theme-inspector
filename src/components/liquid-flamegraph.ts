@@ -44,7 +44,7 @@ export default class LiquidFlamegraph {
       .cellHeight(20)
       .width(flameGraphWidth)
       .label(function(node: FlamegraphNode) {
-        return `${node.data.name} took ${node.value}s`;
+        return `${node.data.name} took ${formatNodeTime(node.value)}ms`;
       })
       .onClick((node: FlamegraphNode) => {
         this.displayNodeDetails(node);
