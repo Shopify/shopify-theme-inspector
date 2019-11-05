@@ -16,9 +16,7 @@ describe('Devtools', () => {
         request.continue();
       }
     });
-    await page.goto(
-      'chrome-extension://midlnkehnoagphldfjijeheblfopolnd/devtools.html',
-    );
+    await page.goto('https://www.google.com/');
   });
 
   it('test initial message for devtools window is displayed', async () => {
