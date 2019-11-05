@@ -23,12 +23,13 @@ function setIconAndPopup(active: string, tabId: number) {
       '128': `images/128-${iconType}.png`,
     },
   });
-
   if (active) {
-    chrome.pageAction.show(tabId);
+    chrome.pageAction.setPopup({tabId, popup: './popupSignIn.html'});
   } else {
-    chrome.pageAction.hide(tabId);
+    chrome.pageAction.setPopup({tabId, popup: './popup.html'});
   }
+
+  chrome.pageAction.show(tabId);
 }
 
 // Create a listener which handles when detectShopify.js, which executes in the
