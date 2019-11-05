@@ -1,20 +1,23 @@
-// Copyright 2018 The Chromium Authors. All rights reserved.
-// Use of this source code is governed by a BSD-style license that can be
-// found in the LICENSE file.
-
-'use strict';
-
-chrome.runtime.onInstalled.addListener(function() {
-  chrome.declarativeContent.onPageChanged.removeRules(undefined, function() {
-    chrome.declarativeContent.onPageChanged.addRules([
-      {
-        conditions: [
-          new chrome.declarativeContent.PageStateMatcher({
-            pageUrl: {hostEquals: 'shop1.myshopify.io'},
-          }),
-        ],
-        actions: [new chrome.declarativeContent.ShowPageAction()],
-      },
-    ]);
+// Change icon from colored to greyscale depending on whether or not Shopify has
+// been detected
+function setIcon(active, tabId) {
+  const iconType = active ? 'shopify' : 'shopify-dimmed';
+  chrome.pageAction.setIcon({
+    tabId,
+    path: {
+      '16': `images/16-${iconType}.png`,
+      '32': `images/32-${iconType}.png`,
+      '48': `images/48-${iconType}.png`,
+      '128': `images/128-${iconType}.png`,
+    },
   });
+}
+
+// Create a listener which handles when detectShopify.js, which executes in the
+// the same context as a tab, sends the results of of whether or not Shopify was
+// detected
+chrome.runtime.onMessage.addListener((request, sender) => {
+  if (sender.tab) {
+    setIcon(request.hasDetectedShopify, sender.tab.id);
+  }
 });

@@ -1,6 +1,6 @@
 {
-  "name": "Shopify",
-  "version": "1.0",
+  "name": "Shopify DevTools",
+  "version": "0.0.2",
   "description": "Profile and debug liquid on your shopify store",
   "devtools_page": "devtools.html",
   "permissions": ["declarativeContent", "storage", "<all_urls>", "activeTab"],
@@ -9,15 +9,26 @@
     "persistent": false
   },
   "icons": {
-    "48": "images/shopify48.png",
-    "128": "images/shopify128.png"
+    "16": "images/16-shopify.png",
+    "32": "images/32-shopify.png",
+    "48": "images/48-shopify.png",
+    "128": "images/128-shopify.png"
   },
   "page_action": {
     "default_popup": "popup.html",
     "default_icon": {
-      "16": "images/shopify16.png",
-      "32": "images/shopify32.png"
+      "16": "images/16-shopify-dimmed.png",
+      "32": "images/32-shopify-dimmed.png",
+      "48": "images/48-shopify-dimmed.png",
+      "128": "images/128-shopify-dimmed.png"
     }
   },
-  "manifest_version": 2
+  "manifest_version": 2,
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": ["detectShopify.js"],
+      "run_at": "document_idle"
+    }
+  ]
 }
