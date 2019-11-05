@@ -1,0 +1,1 @@
+export {OpenIdConfig} from './OpenIdConfig';

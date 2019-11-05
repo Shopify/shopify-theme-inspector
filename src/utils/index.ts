@@ -1,12 +1,4 @@
-import {getProfileData, getURL} from './getProfileData';
-import {toggleDisplay, setTotalTime, formatNodeTime} from './domHelpers';
-import getThemeId from './getThemeId';
-
-export {
-  getProfileData,
-  toggleDisplay,
-  setTotalTime,
-  formatNodeTime,
-  getThemeId,
-  getURL,
-};
+export {getProfileData} from './getProfileData';
+export {getURL, isDev, getThemeId} from './eval';
+export {toggleDisplay, setTotalTime, formatNodeTime} from './domHelpers';
+export {Oauth2} from './oauth2';

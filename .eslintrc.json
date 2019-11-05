@@ -5,6 +5,9 @@
     "plugin:shopify/node",
     "plugin:shopify/prettier"
   ],
+  "env": {
+    "browser": true
+  },
   "parserOptions": {
     "project": "tsconfig.json"
   },

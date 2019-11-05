@@ -1,3 +1,5 @@
+import {getURL} from '.';
+
 export async function getProfileData() {
   let profileData;
   try {
@@ -33,16 +35,7 @@ function formatLiquidProfileData(
   });
 }
 
-export function getURL(): Promise<string> {
-  return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval(
-      'window.location.href',
-      (result: string) => resolve(result),
-    );
-  });
-}
-
-function cleanProfileData(profileData: ProfileData) {
+function cleanProfileData(profileData: {name: any; value: any; children: any}) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,
