@@ -9,7 +9,7 @@ describe('Devtools', () => {
     const extensionName = 'Shopify DevTools';
 
     const targets = await browser.targets();
-    // console.log(targets);
+    console.log(targets);
     // @ts-ignore
     const extensionTarget = targets.find(({_targetInfo}) => {
       return (
