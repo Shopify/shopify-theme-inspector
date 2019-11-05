@@ -1,9 +1,9 @@
 {
   "name": "Shopify DevTools",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Profile and debug liquid on your shopify store",
   "devtools_page": "devtools.html",
-  "permissions": ["declarativeContent", "storage", "<all_urls>", "activeTab"],
+  "permissions": ["declarativeContent", "storage", "<all_urls>", "activeTab", "identity"],
   "background": {
     "scripts": ["background.js"],
     "persistent": false
@@ -15,7 +15,7 @@
     "128": "images/128-shopify.png"
   },
   "page_action": {
-    "default_popup": "popup.html",
+    "default_popup": "popupSignIn.html",
     "default_icon": {
       "16": "images/16-shopify-dimmed.png",
       "32": "images/32-shopify-dimmed.png",

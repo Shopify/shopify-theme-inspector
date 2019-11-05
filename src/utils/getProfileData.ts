@@ -1,3 +1,5 @@
+import { getURL } from '.';
+
 export async function getProfileData() {
   let profileData;
   try {
@@ -19,7 +21,7 @@ export async function getProfileData() {
 function formatLiquidProfileData(
   entries: ProfileNode[],
 ): FormattedProfileNode[] {
-  return entries.map(function(entry: ProfileNode) {
+  return entries.map(function (entry: ProfileNode) {
     return {
       name: `${entry.partial}`,
       value: entry.total_time,
@@ -30,16 +32,7 @@ function formatLiquidProfileData(
   });
 }
 
-export function getURL(): Promise<string> {
-  return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval(
-      'window.location.href',
-      (result: string) => resolve(result),
-    );
-  });
-}
-
-function cleanProfileData(profileData: ProfileData) {
+function cleanProfileData(profileData: { name: any; value: any; children: any }) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,
