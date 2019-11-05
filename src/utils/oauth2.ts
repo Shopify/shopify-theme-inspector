@@ -5,7 +5,7 @@ import {OpenIdConfig} from '../types';
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
 
 export class Oauth2 {
-  static async fetchOpenIdConfig(domain) {
+  static async fetchOpenIdConfig(domain: string): Promise<OpenIdConfig> {
     const response = await fetch(`https://${domain}/${OPENID_CONFIG_PATH}`);
 
     return response.json();
@@ -14,7 +14,7 @@ export class Oauth2 {
   clientId: string;
   config: OpenIdConfig;
 
-  public constructor(clientId, config) {
+  public constructor(clientId: string, config: OpenIdConfig) {
     this.clientId = clientId;
     this.config = config;
   }
@@ -39,7 +39,7 @@ export class Oauth2 {
     return this.exchangeCodeForToken(code, secret);
   }
 
-  private getAuthResult(url, interactive) {
+  private getAuthResult(url: string, interactive: boolean): Promise<string> {
     return new Promise((resolve, reject) => {
       chrome.identity.launchWebAuthFlow({url, interactive}, callbackURL => {
         if (chrome.runtime.lastError) {
@@ -52,7 +52,7 @@ export class Oauth2 {
   }
 
   @boundMethod
-  private async exchangeCodeForToken(code, verifier) {
+  private async exchangeCodeForToken(code: string, verifier: string) {
     const {clientId} = this;
     const url = new URL(this.config.token_endpoint);
 
@@ -71,13 +71,17 @@ export class Oauth2 {
     throw Error(result.statusText);
   }
 
-  private extractCode(responseURL) {
+  private extractCode(responseURL: string): string {
     const {searchParams} = new URL(responseURL);
     const error = searchParams.get('error');
     const code = searchParams.get('code');
 
     if (error) {
       throw new Error(searchParams.get('error_description') || error);
+    }
+
+    if (!code) {
+      throw new Error('RedirectURI code does not exist');
     }
 
     return code;
@@ -93,7 +97,7 @@ export class Oauth2 {
     return chrome.identity.getRedirectURL('auth0');
   }
 
-  private base64URLEncode(str) {
+  private base64URLEncode(str: Buffer) {
     return str
       .toString('base64')
       .replace(/\+/g, '-')
@@ -101,7 +105,7 @@ export class Oauth2 {
       .replace(/[=]/g, '');
   }
 
-  private sha256(buffer) {
+  private sha256(buffer: string) {
     return crypto
       .createHash('sha256')
       .update(buffer)

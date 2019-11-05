@@ -1,4 +1,4 @@
-import { getURL } from '.';
+import {getURL} from '.';
 
 export async function getProfileData() {
   let profileData;
@@ -21,7 +21,7 @@ export async function getProfileData() {
 function formatLiquidProfileData(
   entries: ProfileNode[],
 ): FormattedProfileNode[] {
-  return entries.map(function (entry: ProfileNode) {
+  return entries.map(function(entry: ProfileNode) {
     return {
       name: `${entry.partial}`,
       value: entry.total_time,
@@ -32,7 +32,7 @@ function formatLiquidProfileData(
   });
 }
 
-function cleanProfileData(profileData: { name: any; value: any; children: any }) {
+function cleanProfileData(profileData: {name: any; value: any; children: any}) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,

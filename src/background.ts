@@ -3,7 +3,7 @@ import {isDev, Oauth2} from './utils';
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
 // been detected
-function setIconAndPopup(active, tabId) {
+function setIconAndPopup(active: string, tabId: number) {
   const iconType = active ? 'shopify' : 'shopify-dimmed';
   chrome.pageAction.setIcon({
     tabId,
@@ -26,7 +26,7 @@ function setIconAndPopup(active, tabId) {
 // the same context as a tab, sends the results of of whether or not Shopify was
 // detected
 chrome.runtime.onMessage.addListener((event, sender) => {
-  if (sender.tab) {
+  if (sender.tab && sender.tab.id) {
     setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
   }
 });
