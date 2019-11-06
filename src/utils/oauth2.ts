@@ -1,14 +1,27 @@
 import crypto from 'crypto';
 import {boundMethod} from 'autobind-decorator';
-import {OpenIdConfig} from '../types';
+import {OpenIdConfig, AccessToken} from '../types';
+import {getURL} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
 
 export class Oauth2 {
-  static async fetchOpenIdConfig(domain: string): Promise<OpenIdConfig> {
-    const response = await fetch(`https://${domain}/${OPENID_CONFIG_PATH}`);
+  // Prettier complains if this is not here
 
-    return response.json();
+  /**
+   * Fetches an OpenId configuration from a given domain, which contains details
+   * used to make an oauth2 request from a given service, such as the authorization
+   * url or token url.
+   *
+   * @param domain - The domain which you want to fetch the config from.
+   */
+
+  static async fetchOpenIdConfig(domain: string): Promise<OpenIdConfig> {
+    const result = await fetch(`https://${domain}/${OPENID_CONFIG_PATH}`);
+
+    if (result.ok) return result.json();
+
+    throw Error(result.statusText);
   }
 
   clientId: string;
@@ -19,6 +32,12 @@ export class Oauth2 {
     this.config = config;
   }
 
+  /**
+   * Request a new oauth2 access token from the clientId specified in the constructor
+   *
+   * @param params - Custom query parameters you want to include in the request
+   * @param interactive - Enable and interactive login window using Chrome Identity API
+   */
   @boundMethod
   public async authenticate(params: string[][] = [], interactive = true) {
     const {clientId} = this;
@@ -39,6 +58,50 @@ export class Oauth2 {
     return this.exchangeCodeForToken(code, secret);
   }
 
+  /**
+   * Exchange a valid access token for a new access token for another Identity application
+   *
+   * @param accessToken - A valid access token
+   * @param audienceId - The unique ID of the application you want a new access token from
+   */
+  public async exchangeTokenForToken(
+    accessToken: string,
+    applicationId: string,
+  ): Promise<AccessToken> {
+    const {clientId} = this;
+    const scopes = ['https://api.shopify.com/auth/shop.storefront.devtools'];
+    const url = new URL(this.config.token_endpoint);
+
+    url.search = new URLSearchParams([
+      ['grant_type', 'urn:ietf:params:oauth:grant-type:token-exchange'],
+      ['client_id', clientId],
+      ['audience', applicationId],
+      ['scope', scopes.join('%20')],
+      ['subject_token', accessToken],
+      ['subject_token_type', 'urn:ietf:params:oauth:token-type:access_token'],
+      ['destination', `${await getURL()}admin`],
+    ]).toString();
+
+    const result = await fetch(url.href, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/json',
+      },
+    });
+
+    if (result.ok) return result.json();
+
+    throw Error(result.statusText);
+  }
+
+  /**
+   * Use Chrome's Identity API to get an oauth2 authorization code. This can be
+   * optionally done via an interactive popup window that presents a login view.
+   *
+   * @param url - The oauth2 authorization URL
+   * @param interactive - Enable and interactive login window
+   */
   private getAuthResult(url: string, interactive: boolean): Promise<string> {
     return new Promise((resolve, reject) => {
       chrome.identity.launchWebAuthFlow({url, interactive}, callbackURL => {
@@ -51,8 +114,18 @@ export class Oauth2 {
     });
   }
 
+  /**
+   * Exchange an authorization code for an access token for application clientId
+   * specified in the constructor
+   *
+   * @param code - An authorization code that is recieved from the RedirectURI of a successful login/authorization flow.
+   * @param verifier - The code verifier code associated to the code challenge sent during the authorization flow.
+   */
   @boundMethod
-  private async exchangeCodeForToken(code: string, verifier: string) {
+  private async exchangeCodeForToken(
+    code: string,
+    verifier: string,
+  ): Promise<AccessToken> {
     const {clientId} = this;
     const url = new URL(this.config.token_endpoint);
 
@@ -71,8 +144,15 @@ export class Oauth2 {
     throw Error(result.statusText);
   }
 
-  private extractCode(responseURL: string): string {
-    const {searchParams} = new URL(responseURL);
+  /**
+   * After a successful authorization, the page is redirected. The URL of the
+   * redirected page contains the authorization code. This method extracts that
+   * code from the provided redirect URL.
+   *
+   * @param redirectURL - The redirectURL provided after authorization
+   */
+  private extractCode(redirectURL: string): string {
+    const {searchParams} = new URL(redirectURL);
     const error = searchParams.get('error');
     const code = searchParams.get('code');
 
@@ -112,5 +192,3 @@ export class Oauth2 {
       .digest();
   }
 }
-
-export default ChromeClient;

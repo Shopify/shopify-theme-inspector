@@ -1,9 +1,9 @@
 export function getURL(): Promise<string> {
   return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval(
-      'window.location.href',
-      (result: string) => resolve(result),
-    );
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
+      const url = tabs[0].url;
+      resolve(url);
+    });
   });
 }
 
