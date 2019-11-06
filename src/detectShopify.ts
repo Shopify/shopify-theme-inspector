@@ -1,6 +1,6 @@
 import nullthrows from 'nullthrows';
 
-function injectCode(code) {
+function injectCode(code: string) {
   const script = document.createElement('script');
   script.textContent = code;
 

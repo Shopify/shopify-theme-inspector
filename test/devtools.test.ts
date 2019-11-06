@@ -1,41 +1,10 @@
-import {mockProfileData} from './mock-data/mock-profile-data';
-import {setDevtoolsEval} from './test-helpers';
+import {setupRequestInterception, getExtensionId} from './test-helpers';
 
 describe('Devtools', () => {
   beforeAll(async () => {
-    const dummyPage = await browser.newPage();
-    await dummyPage.waitFor(2000);
-
-    const extensionName = 'Shopify DevTools';
-
-    const targets = await browser.targets();
-    console.log(targets);
-    // @ts-ignore
-    const extensionTarget = targets.find(({_targetInfo}) => {
-      return (
-        _targetInfo.title === extensionName &&
-        _targetInfo.type === 'background_page'
-      );
-    });
-    // @ts-ignore
-    const extensionUrl = extensionTarget._targetInfo.url || '';
-    const [, , extensionID] = extensionUrl.split('/');
-    console.log(`!!!!!!!!!!!${extensionID}`);
-
-    await setDevtoolsEval(page);
-    await page.setRequestInterception(true);
-    page.on('request', request => {
-      if (request.url().endsWith('profile_liquid=true')) {
-        request.respond({
-          status: 200,
-          contentType: 'text/html',
-          body: mockProfileData,
-        });
-      } else {
-        request.continue();
-      }
-    });
-    await page.goto(`chrome-extension://${extensionID}/devtools.html`);
+    const extensionId = await getExtensionId();
+    setupRequestInterception();
+    await page.goto(`chrome-extension://${extensionId}/devtools.html`);
   });
 
   it('test initial message for devtools window is displayed', async () => {
