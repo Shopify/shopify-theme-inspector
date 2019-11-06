@@ -35,7 +35,7 @@ export async function getExtensionId(): Promise<string> {
   });
   // @ts-ignore
   const extensionUrl = extensionTarget._targetInfo.url || '';
-  const [, , extensionId] = extensionUrl.split('/');
+  const extensionId = extensionUrl.split('/')[2];
   return extensionId;
 }
 
