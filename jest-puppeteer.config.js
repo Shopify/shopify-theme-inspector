@@ -9,6 +9,7 @@ module.exports = {
       `--disable-extensions-except=${EXTENSION_PATH}`,
       `--load-extension=${EXTENSION_PATH}`,
       '--user-agent=PuppeteerAgent',
+      '--no-sandbox',
     ],
   },
 };

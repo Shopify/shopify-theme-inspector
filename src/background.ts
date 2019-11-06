@@ -1,6 +1,6 @@
 // Change icon from colored to greyscale depending on whether or not Shopify has
 // been detected
-function setIcon(active, tabId) {
+function setIcon(active: boolean, tabId: number) {
   const iconType = active ? 'shopify' : 'shopify-dimmed';
   chrome.pageAction.setIcon({
     tabId,
@@ -17,7 +17,7 @@ function setIcon(active, tabId) {
 // the same context as a tab, sends the results of of whether or not Shopify was
 // detected
 chrome.runtime.onMessage.addListener((request, sender) => {
-  if (sender.tab) {
+  if (sender.tab && sender.tab.id) {
     setIcon(request.hasDetectedShopify, sender.tab.id);
   }
 });

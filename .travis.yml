@@ -3,9 +3,13 @@ shared:
     language: node_js
     node_js:
       - 10.16.3
+    services:
+      - xvfb
     before_install:
       - curl -o- -L https://yarnpkg.com/install.sh | bash -s -- --version 1.17.3
       - export PATH="$HOME/.yarn/bin:$PATH"
+      - "sysctl kernel.unprivileged_userns_clone=1"
+      - "export DISPLAY=:99.0"
     install:
       - yarn install --production=false --frozen-lockfile
     cache: yarn
