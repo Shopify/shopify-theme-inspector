@@ -9,7 +9,7 @@
     "esModuleInterop": true,
     "declaration": true,
     "strictNullChecks": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "sourceMap": false,
     "noEmitOnError": false,
     "experimentalDecorators": true,
