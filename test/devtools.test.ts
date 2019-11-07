@@ -3,24 +3,6 @@ import {setDevtoolsEval} from './test-helpers';
 
 describe('Devtools', () => {
   beforeAll(async () => {
-    const dummyPage = await browser.newPage();
-    await dummyPage.waitFor(2000);
-
-    const extensionName = 'Shopify DevTools';
-
-    const targets = await browser.targets();
-    // console.log(targets);
-    // @ts-ignore
-    const extensionTarget = targets.find(({_targetInfo}) => {
-      return (
-        _targetInfo.title === extensionName &&
-        _targetInfo.type === 'background_page'
-      );
-    });
-    // @ts-ignore
-    const extensionUrl = extensionTarget._targetInfo.url || '';
-    const [, , extensionID] = extensionUrl.split('/');
-    console.log(`!!!!!!!!!!!${extensionID}`);
     await setDevtoolsEval(page);
     await page.setRequestInterception(true);
     page.on('request', request => {
@@ -34,7 +16,6 @@ describe('Devtools', () => {
         request.continue();
       }
     });
-    await page.goto(`chrome-extension://${extensionID}/devtools.html`);
   });
 
   it('test initial message for devtools window is displayed', async () => {

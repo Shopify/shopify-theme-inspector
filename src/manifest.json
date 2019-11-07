@@ -15,7 +15,7 @@
     "128": "images/128-shopify.png"
   },
   "page_action": {
-    "default_popup": "popupSignIn.html",
+    "default_popup": "popup.html",
     "default_icon": {
       "16": "images/16-shopify-dimmed.png",
       "32": "images/32-shopify-dimmed.png",
