@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
 import {debounce} from 'lodash';
-import {formatNodeTime, getThemeId, getURL} from '../utils';
+import {formatNodeTime, getThemeId, getCurrentTabURL} from '../utils';
 
 const selectors = {
   partial: '[data-partial]',
@@ -87,7 +87,7 @@ export default class LiquidFlamegraph {
     fileName: string,
     lineNumber: number,
   ): Promise<any> {
-    const url = new URL(await getURL());
+    const url = await getCurrentTabURL();
     const hostname = url.hostname;
     const themeId = await getThemeId();
     const fileDetails = fileName.split(':');

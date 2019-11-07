@@ -1,5 +1,14 @@
 import {env} from './env';
-import {isDev, Oauth2, saveLocal} from './utils';
+import {isDev, Oauth2, getCurrentTabURL} from './utils';
+
+const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
+
+const identityDomain = isDev ? env.DEV_OAUTH2_DOMAIN : env.OAUTH2_DOMAIN;
+const clientId = isDev ? env.DEV_OAUTH2_CLIENT_ID : env.OAUTH2_CLIENT_ID;
+const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
+
+const clientAuthParams = [['scope', `openid profile email ${DEVTOOLS_SCOPE}`]];
+const oauth2 = new Oauth2(clientId, identityDomain, {clientAuthParams});
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
 // been detected
@@ -37,30 +46,36 @@ chrome.runtime.onMessage.addListener(async event => {
   if (event.type !== 'authenticate') {
     return;
   }
-  const scope = [
-    'openid',
-    'profile',
-    'email',
-    'https://api.shopify.com/auth/shop.storefront.devtools',
-  ];
-  const params = [['scope', scope.join(' ')], ['device', 'chrome-extension']];
-
-  const identityDomain = isDev ? env.DEV_OAUTH2_DOMAIN : env.OAUTH2_DOMAIN;
-  const clientId = isDev ? env.DEV_OAUTH2_CLIENT_ID : env.OAUTH2_CLIENT_ID;
-  const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
-  const config = await Oauth2.fetchOpenIdConfig(identityDomain);
-  const oauth2 = new Oauth2(clientId, config);
 
   try {
-    const clientAuthResults = await oauth2.authenticate(params);
-    const subjectAuthResults = await oauth2.exchangeTokenForToken(
-      clientAuthResults.access_token,
-      subjectId,
-    );
-    await saveLocal(clientId, JSON.stringify(clientAuthResults));
-    await saveLocal(subjectId, JSON.stringify(subjectAuthResults));
-    console.log('Authentication Successful');
+    await oauth2.authenticate();
   } catch (error) {
     console.log('Authentication Error:', error.message);
   }
+});
+
+// Listen for 'request-core-access-token' event and respond to the messenger
+// with a valid Shopify Core access token. This may trigger a login popup window
+// if needed.
+chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
+  if (event.type === 'request-core-access-token') {
+    return false;
+  }
+
+  getCurrentTabURL()
+    .then(({origin}) => {
+      const params = [
+        ['destination', `${origin}/admin`],
+        ['scope', DEVTOOLS_SCOPE],
+      ];
+      return oauth2.getSubjectAccessToken(subjectId, params);
+    })
+    .then(token => {
+      sendResponse({token});
+    })
+    .catch(error => {
+      sendResponse({error});
+    });
+
+  return true;
 });

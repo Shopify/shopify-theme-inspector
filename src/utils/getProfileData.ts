@@ -1,33 +1,37 @@
-import {env} from '../env';
-import {getURL, getFromLocal, isDev} from '.';
+import nullthrows from 'nullthrows';
+import {AccessToken} from 'types';
+import {getCurrentTabURL} from '.';
 
 export async function getProfileData() {
-  let profileData;
-  const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
-  const {access_token: accessToken} = JSON.parse(await getFromLocal(subjectId));
+  const parser = new DOMParser();
+  const {accessToken} = await requestAccessToken();
+  const url = await getCurrentTabURL();
 
-  if (typeof accessToken === 'undefined') {
-    throw new Error(
-      'Unable to fetch authentitication credientials. Please sign in.',
-    );
-  }
+  url.searchParams.set('profile_liquid', 'true');
 
-  try {
-    const url = new URL(await getURL());
-    url.searchParams.set('profile_liquid', 'true');
-    const response = await fetch(url.href, {
-      headers: {Authorization: `Bearer ${accessToken}`},
-    });
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    profileData = JSON.parse(
-      doc.querySelector('#liquidProfileData')!.innerHTML,
-    );
-  } catch (error) {
-    console.log(error);
-  }
+  const response = await fetch(url.href, {
+    headers: {Authorization: `Bearer ${accessToken}`},
+  });
+  const html = await response.text();
+  const document = parser.parseFromString(html, 'text/html');
+  const profileData = JSON.parse(
+    nullthrows(document.querySelector('#liquidProfileData')).innerHTML,
+  );
   return cleanProfileData(profileData);
+}
+
+function requestAccessToken(): Promise<AccessToken> {
+  return new Promise((resolve, reject) => {
+    return chrome.runtime.sendMessage(
+      'request-core-access-token',
+      ({token, error}) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(token);
+      },
+    );
+  });
 }
 
 function formatLiquidProfileData(
