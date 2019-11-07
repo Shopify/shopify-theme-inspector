@@ -1,15 +1,20 @@
-export function getURL(): Promise<string> {
-  return new Promise(resolve => {
+export function getCurrentTabURL(): Promise<URL> {
+  return new Promise((resolve, reject) => {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
       const url = tabs[0].url;
-      resolve(url);
+
+      if (url) {
+        resolve(new URL(url));
+      }
+
+      reject(new Error('Unable to retrieve URL'));
     });
   });
 }
 
 export async function isDev(): Promise<boolean> {
-  const url = await getURL();
-  return url.includes('shop1.myshopify');
+  const {href} = await getCurrentTabURL();
+  return href.includes('shop1.myshopify');
 }
 
 export function getThemeId() {
