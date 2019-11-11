@@ -20,6 +20,9 @@ function formatLiquidProfileData(
   entries: ProfileNode[],
 ): FormattedProfileNode[] {
   return entries.map(function(entry: ProfileNode) {
+    if (!entry.partial.includes(':')) {
+      entry.partial = `snippet:${entry.partial}`;
+    }
     return {
       name: `${entry.partial}`,
       value: entry.total_time,
