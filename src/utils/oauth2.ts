@@ -126,7 +126,16 @@ export class Oauth2 {
       // If there is an access token but its not valid or expired
       if (token.refreshToken) {
         // There is a refresh token
-        token = await this.refreshClientAccessToken(id, token.refreshToken);
+        try {
+          token = await this.refreshClientAccessToken(id, token.refreshToken);
+        } catch (error) {
+          // If refresh token is rejected
+          if (error.contains('401')) {
+            token = await cb.call(this, id, params);
+          } else {
+            throw error;
+          }
+        }
       } else {
         // No refresh token so request a new access token
         token = await cb.call(this, id, params);
