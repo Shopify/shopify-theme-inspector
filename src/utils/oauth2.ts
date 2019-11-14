@@ -1,9 +1,14 @@
 import crypto from 'crypto';
-// import {boundMethod} from 'autobind-decorator';
-import {OpenIdConfig, AccessToken, TokenResponseBody} from '../types';
+import {
+  OpenIdConfig,
+  AccessToken,
+  TokenResponseBody,
+  TokenIntrospection,
+} from '../types';
 import {saveToLocalStorage, getFromLocalStorage} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
+const TOKEN_EXPIRATION_BUFFER_MS = 60000;
 
 interface Oauth2Options {
   webAuthFlowOptions: Partial<chrome.identity.WebAuthFlowOptions>;
@@ -77,6 +82,30 @@ export class Oauth2 {
   }
 
   /**
+   * When an application is presented with an access token, Identity's Token
+   * Introspection endpoint must be used to verify the validity of the access
+   * token before proceeding further.
+   *
+   * @param {accessToken} - The token which you want to introspect
+   */
+  public async introspectToken({
+    accessToken,
+  }: AccessToken): Promise<TokenIntrospection> {
+    const config = await this.getConfig();
+    const url = new URL(config.introspection_endpoint);
+
+    url.search = new URLSearchParams([['token', accessToken]]).toString();
+
+    const response = await fetch(url.href, {
+      method: 'POST',
+    });
+
+    if (response.ok) return response.json();
+
+    throw Error(response.statusText);
+  }
+
+  /**
    * Try to get the associated from storage, or from refresh token, or request a
    * new token using the provided callback method.
    *
@@ -93,8 +122,8 @@ export class Oauth2 {
     // If no access token then start new access token flow
     if (typeof token === 'undefined') {
       token = await cb.call(this, id, params);
-    } else if (this.isAccessTokenExpired(token)) {
-      // If there is an access token but its expired
+    } else if (await this.isAccessTokenInvalid(token)) {
+      // If there is an access token but its not valid or expired
       if (token.refreshToken) {
         // There is a refresh token
         token = await this.refreshClientAccessToken(id, token.refreshToken);
@@ -170,11 +199,15 @@ export class Oauth2 {
    *
    * @param param0 - An object of type AccessToken
    */
-  private isAccessTokenExpired({
-    accessTokenDate,
-    expiresIn,
-  }: AccessToken): boolean {
-    return new Date().valueOf() - accessTokenDate > expiresIn * 1000;
+  private async isAccessTokenInvalid(token: AccessToken): Promise<boolean> {
+    const {valid, exp} = await this.introspectToken(token);
+
+    // If token expires in the next minute, consider it invalid
+    if (new Date().getTime() >= exp - TOKEN_EXPIRATION_BUFFER_MS) {
+      return true;
+    }
+
+    return !valid;
   }
 
   private async getConfig(): Promise<OpenIdConfig> {
