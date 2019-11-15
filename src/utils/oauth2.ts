@@ -1,9 +1,16 @@
 import crypto from 'crypto';
+// import {env} from '../env';
 // import {boundMethod} from 'autobind-decorator';
 import {OpenIdConfig, AccessToken, TokenResponseBody} from '../types';
-import {saveToLocalStorage, getFromLocalStorage} from '.';
+import {
+  saveToLocalStorage,
+  getFromLocalStorage,
+  clearFromLocalStorage,
+  // isDev,
+} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
+// const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
 
 interface Oauth2Options {
   webAuthFlowOptions: Partial<chrome.identity.WebAuthFlowOptions>;
@@ -58,6 +65,62 @@ export class Oauth2 {
     );
   }
 
+  public async revokeAuthToken() {
+    const token = await this.getAccessTokenFromStorage(this.clientId);
+    console.log(token);
+    // console.log(token);
+    // console.log(this.clientId);
+    // const urlApp = `https://identity.myshopify.io/oauth/revoke?token=${
+    //   token!.refreshToken
+    // }&client_id=${subjectId}`;
+
+    // const responseApp = await fetch(urlApp, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/x-www-form-urlencoded',
+    //   },
+    // });
+
+    // const tokenCore = this.getSubjectAccessToken(subjectId, []);
+    // const urlCore = `https://identity.myshopify.io/oauth/revoke?token=${tokenCore}&client_id=${subjectId}`;
+    // const responseCore = await fetch(urlCore, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/x-www-form-urlencoded',
+    //   },
+    // });
+    // console.log(responseApp);
+    // console.log(responseCore);
+    this.deleteAccessToken();
+    const config = await this.getConfig();
+    console.log(token!.idToken);
+    const url = new URL(
+      `${config.end_session_endpoint}?id_token_hint=${token!.idToken}`,
+    );
+    // const resp = await fetch(url.href, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Content-Type': 'application/x-www-form-urlencoded',
+    //   },
+    // });
+    console.log(url.href);
+    const resp = await fetch(url.href);
+    console.log(resp);
+    this.deleteAccessToken();
+  }
+
+  public async getUserInfo() {
+    const config = await this.getConfig();
+    const token = await this.getAccessTokenFromStorage(this.clientId);
+    const url = new URL(config.userinfo_endpoint);
+    console.log(token!.accessToken);
+    const response = await fetch(url.href, {
+      headers: {Authorization: `Bearer ${token!.accessToken}`},
+    });
+    // const resp = await fetch(url.href);
+    console.log(await response.json());
+  }
+
   /**
    * Get a valid access token for the given application via storage, refresh
    * token, or via token exchange using a valid client token.
@@ -74,6 +137,18 @@ export class Oauth2 {
       params,
       this.exchangeToken,
     );
+  }
+
+  public async hasValidAccessToken(): Promise<Boolean> {
+    const token = await this.getAccessTokenFromStorage(this.clientId);
+    if (typeof token === 'undefined') {
+      return false;
+    }
+    return true;
+  }
+
+  public deleteAccessToken() {
+    clearFromLocalStorage();
   }
 
   /**
@@ -93,6 +168,7 @@ export class Oauth2 {
     // If no access token then start new access token flow
     if (typeof token === 'undefined') {
       token = await cb.call(this, id, params);
+      console.log(token);
     } else if (this.isAccessTokenExpired(token)) {
       // If there is an access token but its expired
       if (token.refreshToken) {
@@ -161,7 +237,10 @@ export class Oauth2 {
     ]).toString();
 
     const resultUrl = await this.launchWebAuthFlow(url.href);
+    // console.log(url.href);
     const code = this.extractCode(resultUrl);
+    // console.log(resultUrl);
+    // console.log(code);
     return this.exchangeCodeForToken(code, codeVerifier);
   }
 
@@ -265,6 +344,7 @@ export class Oauth2 {
       ? new Date(responseDateHeader).valueOf()
       : new Date().valueOf();
     const body: TokenResponseBody = await response.json();
+    console.log(body);
 
     return {
       accessToken: body.access_token,
@@ -274,6 +354,7 @@ export class Oauth2 {
       tokenType: body.token_type,
       issuedTokenType: body.issued_token_type,
       refreshToken: body.refresh_token,
+      idToken: body.id_token,
     };
   }
 
@@ -283,11 +364,14 @@ export class Oauth2 {
    *
    * @param url - The oauth2 authorization URL
    */
-  private launchWebAuthFlow(url: string): Promise<string> {
+  private launchWebAuthFlow(
+    url: string,
+    options: Partial<chrome.identity.WebAuthFlowOptions> = {},
+  ): Promise<string> {
     const {webAuthFlowOptions} = this.options;
     return new Promise((resolve, reject) => {
       chrome.identity.launchWebAuthFlow(
-        {...webAuthFlowOptions, url},
+        {...webAuthFlowOptions, ...options, url},
         callbackURL => {
           if (chrome.runtime.lastError) {
             return reject(new Error(chrome.runtime.lastError.message));
@@ -321,8 +405,9 @@ export class Oauth2 {
       ['client_id', clientId],
       ['code', code],
     ]).toString();
-
+    // console.log(url.href);
     const response = await fetch(url.href, {method: 'POST'});
+    console.log(response);
 
     if (response.ok) return this.normalizeTokenResponse(response);
 

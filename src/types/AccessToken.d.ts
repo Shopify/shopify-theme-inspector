@@ -6,6 +6,7 @@ export interface TokenResponseBody {
   token_type: string;
   issued_token_type: string;
   refresh_token: string;
+  id_token: string;
 }
 
 export interface AccessToken {
@@ -16,4 +17,5 @@ export interface AccessToken {
   tokenType: string;
   refreshToken: string;
   issuedTokenType: string;
+  idToken: string;
 }

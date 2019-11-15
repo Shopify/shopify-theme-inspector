@@ -9,10 +9,11 @@ const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
 
 const clientAuthParams = [['scope', `openid profile email ${DEVTOOLS_SCOPE}`]];
 const oauth2 = new Oauth2(clientId, identityDomain, {clientAuthParams});
+let curTabId;
 
-// Change icon from colored to greyscale depending on whether or not Shopify has
-// been detected
-function setIconAndPopup(active: string, tabId: number) {
+// Set the appropriate extension icon and popup window depending on whether
+// Shopify has been detected and login status.
+async function setIconAndPopup(active: string, tabId: number) {
   const iconType = active ? 'shopify' : 'shopify-dimmed';
   chrome.pageAction.setIcon({
     tabId,
@@ -24,11 +25,15 @@ function setIconAndPopup(active: string, tabId: number) {
     },
   });
 
-  if (active) {
+  const isLoggedIn = await oauth2.hasValidAccessToken();
+  if (isLoggedIn && active) {
+    chrome.pageAction.setPopup({tabId, popup: './popupSignedIn.html'});
+  } else if (active) {
     chrome.pageAction.setPopup({tabId, popup: './popupSignIn.html'});
   } else {
     chrome.pageAction.setPopup({tabId, popup: './popup.html'});
   }
+  oauth2.getUserInfo();
 
   chrome.pageAction.show(tabId);
 }
@@ -39,6 +44,18 @@ function setIconAndPopup(active: string, tabId: number) {
 chrome.runtime.onMessage.addListener((event, sender) => {
   if (sender.tab && sender.tab.id) {
     setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
+    curTabId = sender.tab.id;
+  }
+});
+
+// Create a listener which handles the Sign out button click event from the popup
+chrome.runtime.onMessage.addListener(event => {
+  if (event.type === 'signOut') {
+    oauth2.revokeAuthToken();
+    chrome.pageAction.setPopup({
+      tabId: curTabId,
+      popup: './popupSignIn.html',
+    });
   }
 });
 
@@ -60,24 +77,21 @@ chrome.runtime.onMessage.addListener(async event => {
 // with a valid Shopify Core access token. This may trigger a login popup window
 // if needed.
 chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type === 'request-core-access-token') {
-    return false;
+  if (event === 'request-core-access-token') {
+    getCurrentTabURL()
+      .then(({origin}) => {
+        const params = [
+          ['destination', `${origin}/admin`],
+          ['scope', DEVTOOLS_SCOPE],
+        ];
+        return oauth2.getSubjectAccessToken(subjectId, params);
+      })
+      .then(token => {
+        sendResponse({token});
+      })
+      .catch(error => {
+        sendResponse({error});
+      });
   }
-
-  getCurrentTabURL()
-    .then(({origin}) => {
-      const params = [
-        ['destination', `${origin}/admin`],
-        ['scope', DEVTOOLS_SCOPE],
-      ];
-      return oauth2.getSubjectAccessToken(subjectId, params);
-    })
-    .then(token => {
-      sendResponse({token});
-    })
-    .catch(error => {
-      sendResponse({error});
-    });
-
   return true;
 });

@@ -49,6 +49,11 @@ module.exports = {
       template: 'src/popupSignIn.html',
       chunks: ['popup'],
     }),
+    new HtmlWebpackPlugin({
+      filename: 'popupSignedIn.html',
+      template: 'src/popupSignedIn.html',
+      chunks: ['popup'],
+    }),
     new CopyPlugin(
       [{from: 'src/manifest.json'}, {from: 'src/images', to: 'images'}],
       {copyUnmodified: true},
