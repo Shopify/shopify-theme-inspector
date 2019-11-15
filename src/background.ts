@@ -58,7 +58,7 @@ chrome.runtime.onMessage.addListener(async event => {
 // with a valid Shopify Core access token. This may trigger a login popup window
 // if needed.
 chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type === 'request-core-access-token') {
+  if (event.type !== 'request-core-access-token') {
     return false;
   }
 

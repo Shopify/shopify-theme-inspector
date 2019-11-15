@@ -23,7 +23,7 @@ export async function getProfileData() {
 function requestAccessToken(): Promise<AccessToken> {
   return new Promise((resolve, reject) => {
     return chrome.runtime.sendMessage(
-      'request-core-access-token',
+      {type: 'request-core-access-token'},
       ({token, error}) => {
         if (error) {
           return reject(error);
@@ -51,7 +51,7 @@ function formatLiquidProfileData(
   });
 }
 
-function cleanProfileData(profileData: {name: any; value: any; children: any}) {
+function cleanProfileData(profileData: ProfileData) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,

@@ -25,16 +25,6 @@ const DEFAULT_OPTIONS: Oauth2Options = {
 };
 
 export class Oauth2 {
-  // Prettier complains if this is not here
-
-  /**
-   * Fetches an OpenId configuration from a given domain, which contains details
-   * used to make an oauth2 request from a given service, such as the authorization
-   * url or token url.
-   *
-   * @param domain - The domain which you want to fetch the config from.
-   */
-
   clientId: string;
   domain: string;
   options: Oauth2Options;
@@ -218,6 +208,13 @@ export class Oauth2 {
 
     return !valid;
   }
+
+  /**
+   * Fetches an OpenId configuration from a given domain, which contains details
+   * used to make an oauth2 request from a given service, such as the authorization
+   * url or token url. Only will make a network request for the config if it
+   * hasn't already been done.
+   */
 
   private async getConfig(): Promise<OpenIdConfig> {
     const {domain, config} = this;
