@@ -1,19 +1,37 @@
+import nullthrows from 'nullthrows';
+import {AccessToken} from 'types';
+import {getCurrentTabURL} from '.';
+
 export async function getProfileData() {
-  let profileData;
-  try {
-    const url = new URL(await getURL());
-    url.searchParams.set('profile_liquid', 'true');
-    const response = await fetch(url.href);
-    const html = await response.text();
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(html, 'text/html');
-    profileData = JSON.parse(
-      doc.querySelector('#liquidProfileData')!.innerHTML,
-    );
-  } catch (error) {
-    console.log(error);
-  }
+  const parser = new DOMParser();
+  const {accessToken} = await requestAccessToken();
+  const url = await getCurrentTabURL();
+
+  url.searchParams.set('profile_liquid', 'true');
+
+  const response = await fetch(url.href, {
+    headers: {Authorization: `Bearer ${accessToken}`},
+  });
+  const html = await response.text();
+  const document = parser.parseFromString(html, 'text/html');
+  const profileData = JSON.parse(
+    nullthrows(document.querySelector('#liquidProfileData')).innerHTML,
+  );
   return cleanProfileData(profileData);
+}
+
+function requestAccessToken(): Promise<AccessToken> {
+  return new Promise((resolve, reject) => {
+    return chrome.runtime.sendMessage(
+      {type: 'request-core-access-token'},
+      ({token, error}) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(token);
+      },
+    );
+  });
 }
 
 function formatLiquidProfileData(
@@ -30,15 +48,6 @@ function formatLiquidProfileData(
       code: entry.code,
       line: entry.line_number,
     };
-  });
-}
-
-export function getURL(): Promise<string> {
-  return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval(
-      'window.location.href',
-      (result: string) => resolve(result),
-    );
   });
 }
 

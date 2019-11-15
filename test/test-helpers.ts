@@ -1,11 +1,17 @@
 import {mockProfileData} from './mock-data/mock-profile-data';
+import openIdConfiguration from './mock-data/openid-configuration.json';
+import {mockAccessToken} from './mock-data/mock-access-token';
 
-const evalCondition = `
-  if(value === 'window.location.href'){
-    cb('https://shop1.myshopify.io/?profile_liquid=true');
-  } else {
-    cb(true)
-  }`;
+export function mockChromeTabs(page: any) {
+  return page.evaluateOnNewDocument(`
+    window.chrome = window.chrome || {};
+    window.chrome.tabs = window.chrome.tabs || {};
+
+    window.chrome.tabs.query = function(options, cb) {
+      cb([{url: 'https://shop1.myshopify.io/?profile_liquid=true'}])
+    }
+  `);
+}
 
 export function setDevtoolsEval(page: any) {
   return page.evaluateOnNewDocument(`
@@ -14,9 +20,25 @@ export function setDevtoolsEval(page: any) {
       window.chrome.devtools.inspectedWindow = window.chrome.devtools.inspectedWindow || {};
       window.chrome.devtools.panels = window.chrome.devtools.panels || {};
 
-      window.chrome.devtools.inspectedWindow.eval = function(value, cb){${evalCondition}};
+      window.chrome.devtools.inspectedWindow.eval = function(value, cb){return cb(true)};
       window.chrome.devtools.panels.create = () => {};
       `);
+}
+
+export function mockChromeSendMessage(page: any) {
+  return page.evaluateOnNewDocument(`
+  window.chrome = window.chrome || {};
+  window.chrome.runtime = window.chrome.runtime || {};
+
+  window.chrome.runtime.sendMessage = function(payload, cb) {
+    if(payload.type === 'request-core-access-token') {
+      console.log('Mocked Send Message: request-core-access-token');
+      return cb({token: JSON.parse('${JSON.stringify(mockAccessToken)}')});
+    }
+
+    return cb({error: 'Unable to mock Chrome Send Message'});
+  }
+  `);
 }
 
 export async function getExtensionId(): Promise<string> {
@@ -39,15 +61,24 @@ export async function getExtensionId(): Promise<string> {
   return extensionId;
 }
 
-export async function setupRequestInterception() {
+export async function setupRequestInterception(page: any) {
   await setDevtoolsEval(page);
   await page.setRequestInterception(true);
-  page.on('request', request => {
-    if (request.url().endsWith('profile_liquid=true')) {
+
+  page.on('request', (request: any) => {
+    const url = new URL(request.url());
+
+    if (url.searchParams.get('profile_liquid')) {
       request.respond({
         status: 200,
         contentType: 'text/html',
         body: mockProfileData,
+      });
+    } else if (url.pathname === '/.well-known/openid-configuration.json') {
+      request.respond({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify(openIdConfiguration),
       });
     } else {
       request.continue();

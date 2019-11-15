@@ -1,9 +1,16 @@
-import {setupRequestInterception, getExtensionId} from './test-helpers';
+import {
+  setupRequestInterception,
+  mockChromeSendMessage,
+  getExtensionId,
+  mockChromeTabs,
+} from './test-helpers';
 
 describe('Devtools', () => {
   beforeAll(async () => {
     const extensionId = await getExtensionId();
-    setupRequestInterception();
+    await setupRequestInterception(page);
+    await mockChromeSendMessage(page);
+    await mockChromeTabs(page);
     await page.goto(`chrome-extension://${extensionId}/devtools.html`);
   });
 
