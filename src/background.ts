@@ -8,7 +8,7 @@ const clientId = isDev ? env.DEV_OAUTH2_CLIENT_ID : env.OAUTH2_CLIENT_ID;
 const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
 
 const clientAuthParams = [['scope', `openid profile email ${DEVTOOLS_SCOPE}`]];
-const oauth2 = new Oauth2(clientId, identityDomain, {clientAuthParams});
+export const oauth2 = new Oauth2(clientId, identityDomain, {clientAuthParams});
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
 // been detected
@@ -23,14 +23,18 @@ function setIconAndPopup(active: string, tabId: number) {
       '128': `images/128-${iconType}.png`,
     },
   });
-  if (active) {
-    chrome.pageAction.setPopup({tabId, popup: './popupSignIn.html'});
-  } else {
-    chrome.pageAction.setPopup({tabId, popup: './popup.html'});
-  }
 
+  if (active) {
+    chrome.pageAction.setPopup({tabId, popup: './popupAuthFlow.html'});
+  }
   chrome.pageAction.show(tabId);
 }
+
+chrome.runtime.onMessage.addListener(event => {
+  if (event.type === 'signOut') {
+    oauth2.logoutUser();
+  }
+});
 
 // Create a listener which handles when detectShopify.js, which executes in the
 // the same context as a tab, sends the results of of whether or not Shopify was

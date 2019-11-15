@@ -4,8 +4,13 @@ import {
   AccessToken,
   TokenResponseBody,
   TokenIntrospection,
+  UserInfo,
 } from '../types';
-import {saveToLocalStorage, getFromLocalStorage} from '.';
+import {
+  saveToLocalStorage,
+  getFromLocalStorage,
+  clearFromLocalStorage,
+} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
 const TOKEN_EXPIRATION_BUFFER_MS = 60000;
@@ -71,6 +76,35 @@ export class Oauth2 {
     );
   }
 
+  /*
+   * Check to see if client token exists in local and is valid
+   */
+  public async hasValidClientToken(): Promise<Boolean> {
+    const token = await this.getAccessTokenFromStorage(this.clientId);
+    if (typeof token !== 'undefined') {
+      return this.isAccessTokenInvalid(token);
+    }
+
+    return false;
+  }
+
+  public logoutUser() {
+    this.deleteAccessToken();
+  }
+
+  public async getUserInfo(): Promise<UserInfo> {
+    const config = await this.getConfig();
+    const token = await this.authenticate();
+    const url = new URL(config.userinfo_endpoint);
+    const response = await fetch(url.href, {
+      headers: {Authorization: `Bearer ${token!.accessToken}`},
+    });
+
+    if (response.ok) return response.json();
+
+    throw Error(response.statusText);
+  }
+
   /**
    * When an application is presented with an access token, Identity's Token
    * Introspection endpoint must be used to verify the validity of the access
@@ -85,9 +119,12 @@ export class Oauth2 {
     const url = new URL(config.introspection_endpoint);
 
     url.search = new URLSearchParams([['token', accessToken]]).toString();
-
     const response = await fetch(url.href, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Authorization: `Bearer ${accessToken}`,
+      },
     });
 
     if (response.ok) return response.json();
@@ -133,6 +170,10 @@ export class Oauth2 {
     }
 
     return this.saveAccessTokenToStorage(id, token);
+  }
+
+  private deleteAccessToken() {
+    clearFromLocalStorage();
   }
 
   /**
@@ -198,15 +239,14 @@ export class Oauth2 {
    *
    * @param param0 - An object of type AccessToken
    */
-  private async isAccessTokenInvalid(token: AccessToken): Promise<boolean> {
-    const {valid, exp} = await this.introspectToken(token);
+  private isAccessTokenInvalid(token: AccessToken): boolean {
+    const {accessTokenDate, expiresIn} = token;
 
     // If token expires in the next minute, consider it invalid
-    if (new Date().getTime() >= exp - TOKEN_EXPIRATION_BUFFER_MS) {
-      return true;
-    }
-
-    return !valid;
+    return (
+      new Date().getTime() >=
+      accessTokenDate + expiresIn - TOKEN_EXPIRATION_BUFFER_MS
+    );
   }
 
   /**

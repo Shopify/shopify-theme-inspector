@@ -20,3 +20,7 @@ export function getFromLocalStorage(key: string): Promise<string | undefined> {
     });
   });
 }
+
+export function clearFromLocalStorage() {
+  chrome.storage.local.clear();
+}
