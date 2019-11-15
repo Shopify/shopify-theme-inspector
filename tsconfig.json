@@ -19,6 +19,7 @@
     "lib": ["dom", "es2015"],
     "strict": true,
     "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
   },
   "include": ["./src/**/*.ts"],
 }
