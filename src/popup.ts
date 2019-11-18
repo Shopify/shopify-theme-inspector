@@ -1,6 +1,4 @@
 import './styles/popup.css';
-import {oauth2} from './background';
-import {UserInfo} from './types';
 
 const selectors = {
   popupSignedIn: '[data-popup-signed-in]',
@@ -11,10 +9,10 @@ const selectors = {
 async function setSignedInPopup() {
   document.querySelector(selectors.popupSignedIn)!.classList.remove('hide');
   document.querySelector(selectors.popupSignIn)!.classList.add('hide');
-  const userInfo: UserInfo = await oauth2.getUserInfo();
+  const name = await getUserName();
   document.querySelector(
     selectors.popupSignedInPrompt,
-  )!.innerHTML = `You are logged in as <b>${userInfo.given_name}</b>`;
+  )!.innerHTML = `You are logged in as <b>${name}</b>`;
 }
 
 function setSignInPopup() {
@@ -23,7 +21,7 @@ function setSignInPopup() {
 }
 
 async function setupPopupWindow() {
-  const isLoggedIn = await oauth2.hasValidClientToken();
+  const isLoggedIn = await getAuthStatus();
 
   if (isLoggedIn) {
     setSignedInPopup();
@@ -44,5 +42,33 @@ document.querySelector(`[data-sign-out]`)!.addEventListener('click', () => {
   });
   setSignInPopup();
 });
+
+function getUserName(): Promise<String> {
+  return new Promise((resolve, reject) => {
+    return chrome.runtime.sendMessage(
+      {type: 'request-user-info'},
+      ({name, error}) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(name);
+      },
+    );
+  });
+}
+
+function getAuthStatus(): Promise<boolean> {
+  return new Promise((resolve, reject) => {
+    return chrome.runtime.sendMessage(
+      {type: 'request-auth-status'},
+      ({isLoggedIn, error}) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(isLoggedIn);
+      },
+    );
+  });
+}
 
 setupPopupWindow();

@@ -8,7 +8,7 @@ const clientId = isDev ? env.DEV_OAUTH2_CLIENT_ID : env.OAUTH2_CLIENT_ID;
 const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
 
 const clientAuthParams = [['scope', `openid profile email ${DEVTOOLS_SCOPE}`]];
-export const oauth2 = new Oauth2(clientId, identityDomain, {clientAuthParams});
+const oauth2 = new Oauth2(clientId, identityDomain, {clientAuthParams});
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
 // been detected
@@ -77,6 +77,40 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
     })
     .then(token => {
       sendResponse({token});
+    })
+    .catch(error => {
+      sendResponse({error});
+    });
+
+  return true;
+});
+
+// Listen for the 'request-user-info' event and respond to the messenger
+// with a the given_name of the currently logged in user.
+chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
+  if (event.type !== 'request-user-info') return false;
+
+  oauth2
+    .getUserInfo()
+    .then(userInfo => {
+      const name = userInfo.given_name;
+      sendResponse({name});
+    })
+    .catch(error => {
+      sendResponse({error});
+    });
+
+  return true;
+});
+
+// Listen for the 'request-auth-status' event and respond to the messenger
+// with a boolean of user login status.
+chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
+  if (event.type !== 'request-auth-status') return false;
+  oauth2
+    .hasValidClientToken()
+    .then(isLoggedIn => {
+      sendResponse({isLoggedIn});
     })
     .catch(error => {
       sendResponse({error});
