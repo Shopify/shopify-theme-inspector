@@ -88,13 +88,22 @@ export class Oauth2 {
     return false;
   }
 
-  public logoutUser() {
+  public async logoutUser() {
+    const token = await this.getAccessTokenFromStorage(this.clientId);
+    const config = await this.getConfig();
+    console.log(token!.idToken);
+    const url = new URL(
+      `${config.end_session_endpoint}?id_token_hint=${token!.idToken}`,
+    );
+    // console.log(url.href);
+    const resp = await fetch(url.href);
+    console.log(resp);
     this.deleteAccessToken();
   }
 
   public async getUserInfo(): Promise<UserInfo> {
     const config = await this.getConfig();
-    const token = await this.authenticate();
+    const token = await this.getAccessTokenFromStorage(this.clientId);
     const url = new URL(config.userinfo_endpoint);
     const response = await fetch(url.href, {
       headers: {Authorization: `Bearer ${token!.accessToken}`},
@@ -126,7 +135,7 @@ export class Oauth2 {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-
+    // console.log(response);
     if (response.ok) return response.json();
 
     throw Error(response.statusText);
@@ -345,7 +354,8 @@ export class Oauth2 {
       ? new Date(responseDateHeader).valueOf()
       : new Date().valueOf();
     const body: TokenResponseBody = await response.json();
-
+    console.log('fresh token');
+    console.log(body.id_token);
     return {
       accessToken: body.access_token,
       accessTokenDate,
@@ -354,6 +364,7 @@ export class Oauth2 {
       tokenType: body.token_type,
       issuedTokenType: body.issued_token_type,
       refreshToken: body.refresh_token,
+      idToken: body.id_token,
     };
   }
 
