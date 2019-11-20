@@ -90,15 +90,23 @@ export class Oauth2 {
 
   public async logoutUser() {
     const token = await this.getAccessTokenFromStorage(this.clientId);
-    const config = await this.getConfig();
-    console.log(token!.idToken);
-    const url = new URL(
-      `${config.end_session_endpoint}?id_token_hint=${token!.idToken}`,
-    );
-    // console.log(url.href);
-    const resp = await fetch(url.href);
-    console.log(resp);
-    this.deleteAccessToken();
+    const url = new URL(`https://identity.myshopify.io/api/v1/logout`);
+    if (token) {
+      url.search = new URLSearchParams([
+        ['id_token_hint', token.idToken],
+      ]).toString();
+    }
+    const response = await fetch(url.href, {
+      method: 'delete',
+      headers: {Authorization: `Bearer ${token!.accessToken}`},
+    });
+
+    if (response.ok) {
+      this.deleteAccessToken();
+      return true;
+    }
+
+    throw Error(response.statusText);
   }
 
   public async getUserInfo(): Promise<UserInfo> {
@@ -135,7 +143,7 @@ export class Oauth2 {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    // console.log(response);
+
     if (response.ok) return response.json();
 
     throw Error(response.statusText);
@@ -354,8 +362,7 @@ export class Oauth2 {
       ? new Date(responseDateHeader).valueOf()
       : new Date().valueOf();
     const body: TokenResponseBody = await response.json();
-    console.log('fresh token');
-    console.log(body.id_token);
+
     return {
       accessToken: body.access_token,
       accessTokenDate,
