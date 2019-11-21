@@ -88,7 +88,7 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 // Listen for the 'request-user-info' event and respond to the messenger
 // with a the given_name of the currently logged in user.
 chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type !== 'request-user-info') return false;
+  if (event.type !== 'request-user-name') return false;
 
   oauth2
     .getUserInfo()

@@ -6,14 +6,11 @@ import {
   TokenIntrospection,
   UserInfo,
 } from '../types';
-import {
-  saveToLocalStorage,
-  getFromLocalStorage,
-  clearFromLocalStorage,
-} from '.';
+import {saveToLocalStorage, getFromLocalStorage, clearLocalStorage} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
-const TOKEN_EXPIRATION_BUFFER_MS = 60000;
+// This makes sure token does not expire after checking and in between making the request
+const TOKEN_EXPIRATION_SAFETY_BUFFER = 60000;
 
 interface Oauth2Options {
   webAuthFlowOptions: Partial<chrome.identity.WebAuthFlowOptions>;
@@ -82,7 +79,10 @@ export class Oauth2 {
   public async hasValidClientToken(): Promise<Boolean> {
     const token = await this.getAccessTokenFromStorage(this.clientId);
     if (typeof token !== 'undefined') {
-      return this.isAccessTokenInvalid(token);
+      if (this.isAccessTokenInvalid(token)) {
+        await this.authenticate();
+      }
+      return true;
     }
 
     return false;
@@ -173,7 +173,7 @@ export class Oauth2 {
   }
 
   private deleteAccessToken() {
-    clearFromLocalStorage();
+    clearLocalStorage();
   }
 
   /**
@@ -245,7 +245,7 @@ export class Oauth2 {
     // If token expires in the next minute, consider it invalid
     return (
       new Date().getTime() >=
-      accessTokenDate + expiresIn - TOKEN_EXPIRATION_BUFFER_MS
+      accessTokenDate + expiresIn - TOKEN_EXPIRATION_SAFETY_BUFFER
     );
   }
 
@@ -333,6 +333,7 @@ export class Oauth2 {
 
   /**
    * Convert the response from the token endpoint into a valid AccessToken object
+   * The expires_in time in the response is in seconds, coverted to ms here
    *
    * @param response - A successful response from the oauth/token endpoint
    */
@@ -348,7 +349,7 @@ export class Oauth2 {
     return {
       accessToken: body.access_token,
       accessTokenDate,
-      expiresIn: body.expires_in,
+      expiresIn: body.expires_in * 1000,
       scope: body.scope,
       tokenType: body.token_type,
       issuedTokenType: body.issued_token_type,

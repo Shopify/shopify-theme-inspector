@@ -21,6 +21,6 @@ export function getFromLocalStorage(key: string): Promise<string | undefined> {
   });
 }
 
-export function clearFromLocalStorage() {
+export function clearLocalStorage() {
   chrome.storage.local.clear();
 }

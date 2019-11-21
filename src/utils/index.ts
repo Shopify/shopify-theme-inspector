@@ -5,5 +5,5 @@ export {Oauth2} from './oauth2';
 export {
   saveToLocalStorage,
   getFromLocalStorage,
-  clearFromLocalStorage,
+  clearLocalStorage,
 } from './storage';
