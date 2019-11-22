@@ -1,4 +1,34 @@
-#popup {
+.popup {
   width: 200px;
   padding: 0px 5px;
 }
+
+.sign-in-button {
+  padding: 7px;
+  background-color: #5867C3;
+  border: 0px;
+  display: flex;
+  margin: 0 auto;
+  color: white;
+  font-size: 13px;
+}
+
+.shopify-logo {
+  width: 100px;
+  margin: 0 auto;
+  display: flex;
+}
+
+.faded-hr {
+  opacity: 0.5;
+}
+
+.login-prompt {
+  font-size: 13px;
+  text-align: center;
+}
+
+.hide {
+  display: none;
+}
+

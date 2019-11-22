@@ -40,13 +40,13 @@ module.exports = {
       chunks: ['devtools'],
     }),
     new HtmlWebpackPlugin({
-      filename: 'popup.html',
-      template: 'src/popup.html',
+      filename: 'popupAuthFlow.html',
+      template: 'src/popupAuthFlow.html',
       chunks: ['popup'],
     }),
     new HtmlWebpackPlugin({
-      filename: 'popupSignIn.html',
-      template: 'src/popupSignIn.html',
+      filename: 'popupNotShopifyStore.html',
+      template: 'src/popupNotShopifyStore.html',
       chunks: ['popup'],
     }),
     new CopyPlugin(

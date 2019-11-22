@@ -25,11 +25,16 @@ function setIconAndPopup(active: string, tabId: number) {
   });
 
   if (active) {
-    chrome.pageAction.show(tabId);
-  } else {
-    chrome.pageAction.hide(tabId);
+    chrome.pageAction.setPopup({tabId, popup: './popupAuthFlow.html'});
   }
+  chrome.pageAction.show(tabId);
 }
+
+chrome.runtime.onMessage.addListener(event => {
+  if (event.type === 'signOut') {
+    oauth2.logoutUser();
+  }
+});
 
 // Create a listener which handles when detectShopify.js, which executes in the
 // the same context as a tab, sends the results of of whether or not Shopify was
@@ -72,6 +77,40 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
     })
     .then(token => {
       sendResponse({token});
+    })
+    .catch(error => {
+      sendResponse({error});
+    });
+
+  return true;
+});
+
+// Listen for the 'request-user-info' event and respond to the messenger
+// with a the given_name of the currently logged in user.
+chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
+  if (event.type !== 'request-user-name') return false;
+
+  oauth2
+    .getUserInfo()
+    .then(userInfo => {
+      const name = userInfo.given_name;
+      sendResponse({name});
+    })
+    .catch(error => {
+      sendResponse({error});
+    });
+
+  return true;
+});
+
+// Listen for the 'request-auth-status' event and respond to the messenger
+// with a boolean of user login status.
+chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
+  if (event.type !== 'request-auth-status') return false;
+  oauth2
+    .hasValidClientToken()
+    .then(isLoggedIn => {
+      sendResponse({isLoggedIn});
     })
     .catch(error => {
       sendResponse({error});
