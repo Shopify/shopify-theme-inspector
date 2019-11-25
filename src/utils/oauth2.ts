@@ -6,10 +6,16 @@ import {
   TokenIntrospection,
   UserInfo,
 } from '../types';
-import {saveToLocalStorage, getFromLocalStorage, clearLocalStorage} from '.';
+import {
+  saveToLocalStorage,
+  getFromLocalStorage,
+  clearLocalStorage,
+  saveIdTokenToLocalStorage,
+  getIdTokenFromStorage,
+} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
-// This makes sure token does not expire after checking and in between making the request
+// This makes sure token does not expire between checking validity and making the request
 const TOKEN_EXPIRATION_SAFETY_BUFFER = 60000;
 
 interface Oauth2Options {
@@ -90,12 +96,13 @@ export class Oauth2 {
 
   public async logoutUser() {
     const token = await this.getAccessTokenFromStorage(this.clientId);
+    const idToken = await getIdTokenFromStorage();
     const url = new URL(`https://identity.myshopify.io/api/v1/logout`);
-    if (token) {
-      url.search = new URLSearchParams([
-        ['id_token_hint', token.idToken],
-      ]).toString();
+
+    if (idToken) {
+      url.search = new URLSearchParams([['id_token_hint', idToken]]).toString();
     }
+
     const response = await fetch(url.href, {
       method: 'delete',
       headers: {Authorization: `Bearer ${token!.accessToken}`},
@@ -363,6 +370,10 @@ export class Oauth2 {
       : new Date().valueOf();
     const body: TokenResponseBody = await response.json();
 
+    if (body.id_token) {
+      saveIdTokenToLocalStorage(body.id_token);
+    }
+
     return {
       accessToken: body.access_token,
       accessTokenDate,
@@ -371,7 +382,6 @@ export class Oauth2 {
       tokenType: body.token_type,
       issuedTokenType: body.issued_token_type,
       refreshToken: body.refresh_token,
-      idToken: body.id_token,
     };
   }
 

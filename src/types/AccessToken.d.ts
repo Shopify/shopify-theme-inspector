@@ -17,5 +17,4 @@ export interface AccessToken {
   tokenType: string;
   refreshToken: string;
   issuedTokenType: string;
-  idToken: string;
 }

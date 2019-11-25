@@ -6,4 +6,6 @@ export {
   saveToLocalStorage,
   getFromLocalStorage,
   clearLocalStorage,
+  saveIdTokenToLocalStorage,
+  getIdTokenFromStorage,
 } from './storage';
