@@ -26,14 +26,22 @@
     <p>Press the <img class="refresh-icon" src="images/refresh-arrow.png"> button to get started</p>
   </div>
 
-  <div data-flamegraph-container class="chart"></div>
-  <p data-total-time class="total-time"></p>
+  <div data-flamegraph-wrapper>
+    <div data-page-not-profilable class="initial-message hide">
+      <img class="warning-sign" src="./images/warning-sign.png">
+      <h2>This page cannot be profiled</h2>
+      <p>Click here to read more about this.</p>
+    </div>
 
-  <div data-detailed-info class="detailed-info">
-    <p data-partial></p>
-    <p data-node-time></p>
-    <p data-code></p>
-    <p data-line></p>
+    <div data-flamegraph-container class="chart"></div>
+    <p data-total-time class="total-time"></p>
+
+    <div data-detailed-info class="detailed-info">
+      <p data-partial></p>
+      <p data-node-time></p>
+      <p data-code></p>
+      <p data-line></p>
+    </div>
   </div>
 </body>
 </html>

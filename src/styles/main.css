@@ -59,3 +59,11 @@ body {
   border: 1px solid rgb(208, 208, 208);
   padding: 4px;
 }
+
+.warning-sign {
+  width: 50px;
+}
+
+.loading-fade {
+  opacity: 0.6;
+}

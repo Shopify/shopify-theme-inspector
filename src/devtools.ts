@@ -1,6 +1,11 @@
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
-import {toggleDisplay, getProfileData, setTotalTime} from './utils';
+import {
+  toggleClass,
+  getProfileData,
+  setTotalTime,
+  hideFlameGraphAndDetails,
+} from './utils';
 
 import './styles/main.css';
 
@@ -9,6 +14,8 @@ const selectors = {
   flamegraphContainer: '[data-flamegraph-container]',
   loadingAnimation: '[data-loading-animation]',
   initialMessage: '[data-initial-message]',
+  notProfilableMessage: '[data-page-not-profilable]',
+  flamegraphWrapper: '[data-flamegraph-wrapper]',
 };
 
 let liquidFlamegraph: LiquidFlamegraph;
@@ -28,18 +35,31 @@ chrome.devtools.inspectedWindow.eval(
 
 async function refreshPanel() {
   document.querySelector(selectors.initialMessage)!.innerHTML = '';
-  toggleDisplay(selectors.loadingAnimation);
+  toggleClass(selectors.flamegraphWrapper, 'loading-fade');
+  toggleClass(selectors.loadingAnimation, 'hide');
   const profile = await getProfileData();
-  toggleDisplay(selectors.loadingAnimation);
+  toggleClass(selectors.loadingAnimation, 'hide');
+  toggleClass(selectors.flamegraphWrapper, 'loading-fade');
 
-  liquidFlamegraph = new LiquidFlamegraph(
-    document.querySelector(selectors.flamegraphContainer),
-    profile,
-  );
+  if (profile) {
+    liquidFlamegraph = new LiquidFlamegraph(
+      document.querySelector(selectors.flamegraphContainer),
+      profile,
+    );
 
-  setTimeout(function() {
-    setTotalTime(profile.value);
-  }, 300);
+    setTimeout(function() {
+      setTotalTime(profile.value);
+    }, 300);
+
+    document
+      .querySelector(selectors.notProfilableMessage)!
+      .classList.add('hide');
+  } else {
+    hideFlameGraphAndDetails();
+    document
+      .querySelector(selectors.notProfilableMessage)!
+      .classList.remove('hide');
+  }
 }
 
 function zoomOutFlamegraph() {

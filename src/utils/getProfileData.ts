@@ -12,12 +12,27 @@ export async function getProfileData() {
   const response = await fetch(url.href, {
     headers: {Authorization: `Bearer ${accessToken}`},
   });
-  const html = await response.text();
-  const document = parser.parseFromString(html, 'text/html');
-  const profileData = JSON.parse(
-    nullthrows(document.querySelector('#liquidProfileData')).innerHTML,
-  );
-  return cleanProfileData(profileData);
+
+  if (response.ok) {
+    const html = await response.text();
+    const document = parser.parseFromString(html, 'text/html');
+    let profileData;
+    if (profileExists(document)) {
+      profileData = JSON.parse(
+        nullthrows(document.querySelector('#liquidProfileData')).innerHTML,
+      );
+    } else {
+      return false;
+    }
+
+    return cleanProfileData(profileData);
+  }
+
+  throw Error(response.statusText);
+}
+
+function profileExists(document: HTMLDocument) {
+  return document.querySelector('#liquidProfileData') !== null;
 }
 
 function requestAccessToken(): Promise<AccessToken> {
