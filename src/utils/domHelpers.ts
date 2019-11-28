@@ -1,9 +1,3 @@
-const selectors = {
-  flamegraphContainer: '[data-flamegraph-container]',
-  totalTimeInfo: '[data-total-time]',
-  detailedNodeInfo: '[data-detailed-info]',
-};
-
 export function toggleClass(dataSelector: string, className: string) {
   const selectedDiv = document.querySelector(dataSelector);
   if (selectedDiv) {
@@ -26,10 +20,4 @@ export function formatNodeTime(nodeTime: number) {
   } else {
     return '< 1';
   }
-}
-
-export function hideFlameGraphAndDetails() {
-  document.querySelector(selectors.flamegraphContainer)!.innerHTML = '';
-  document.querySelector(selectors.totalTimeInfo)!.innerHTML = '';
-  document.querySelector(selectors.detailedNodeInfo)!.innerHTML = '';
 }

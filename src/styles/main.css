@@ -10,7 +10,7 @@ body {
   margin: 20px 20px;
 }
 
-.initial-message {
+.centered-message {
   position: fixed;
   top: 50%;
   left: 50%;

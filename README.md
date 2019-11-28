@@ -12,6 +12,12 @@ Devtool to profile and visualize liquid performance.
 3. Navigate to the Shopify panel which should be visible in the same top bar as `Console` and `Network`. If it is not visible click the `>>` icon to the right of the panel names and select Shopify.
 4. Click the load profile button to view the flamegraph. Click [here](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description) for more contexts on flamegraphs and how to read them.
 
+The Shopify Devtool tab will only show up when you're on your Shopify store.
+If you see an error saying `This page cannot be profiled` it may be because:
+1. You are not currently on a Shopify store.
+2. The checkout flow is not meant to be profiled using this extension.
+
+
 ## Contributing
 To learn more about how to contribute to this project check out the [contributing](https://github.com/Shopify/shopify-devtools/blob/master/CONTRIBUTING.md) documentation.
 

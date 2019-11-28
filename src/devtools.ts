@@ -1,11 +1,6 @@
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
-import {
-  toggleClass,
-  getProfileData,
-  setTotalTime,
-  hideFlameGraphAndDetails,
-} from './utils';
+import {toggleClass, getProfileData, setTotalTime} from './utils';
 
 import './styles/main.css';
 
@@ -37,7 +32,10 @@ async function refreshPanel() {
   document.querySelector(selectors.initialMessage)!.innerHTML = '';
   toggleClass(selectors.flamegraphWrapper, 'loading-fade');
   toggleClass(selectors.loadingAnimation, 'hide');
+  document.querySelector(selectors.notProfilableMessage)!.classList.add('hide');
+
   const profile = await getProfileData();
+
   toggleClass(selectors.loadingAnimation, 'hide');
   toggleClass(selectors.flamegraphWrapper, 'loading-fade');
 
@@ -52,10 +50,10 @@ async function refreshPanel() {
     }, 300);
 
     document
-      .querySelector(selectors.notProfilableMessage)!
-      .classList.add('hide');
+      .querySelector(selectors.flamegraphWrapper)!
+      .classList.remove('hide');
   } else {
-    hideFlameGraphAndDetails();
+    document.querySelector(selectors.flamegraphWrapper)!.classList.add('hide');
     document
       .querySelector(selectors.notProfilableMessage)!
       .classList.remove('hide');
