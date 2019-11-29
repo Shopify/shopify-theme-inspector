@@ -1,7 +1,7 @@
 {
-  "name": "Shopify DevTools",
-  "version": "0.0.3",
-  "description": "Profile and debug liquid on your shopify store",
+  "name": "Shopify Theme Inspector for Chrome",
+  "version": "0.0.4",
+  "description": "Profile and debug Liquid template on your Shopify store",
   "devtools_page": "devtools.html",
   "permissions": ["declarativeContent", "storage", "<all_urls>", "activeTab", "identity"],
   "background": {
