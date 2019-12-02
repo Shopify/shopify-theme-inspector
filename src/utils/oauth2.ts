@@ -97,7 +97,13 @@ export class Oauth2 {
   public async logoutUser() {
     const token = await this.getAccessTokenFromStorage(this.clientId);
     const idToken = await getIdTokenFromStorage();
-    const url = new URL(`https://identity.myshopify.io/api/v1/logout`);
+    const config = await this.getConfig();
+
+    // This base url changes according to development or production environment
+    const baseUrl = config.issuer;
+
+    // This endpoint is hard coded because it is not standard oauth
+    const url = new URL(`${baseUrl}/api/v1/logout`);
 
     if (idToken) {
       url.search = new URLSearchParams([['id_token_hint', idToken]]).toString();
