@@ -1,10 +1,3 @@
-export function toggleClass(dataSelector: string, className: string) {
-  const selectedDiv = document.querySelector(dataSelector);
-  if (selectedDiv) {
-    selectedDiv.classList.toggle(className);
-  }
-}
-
 export function setTotalTime(totalTime: number) {
   document.querySelector(
     '[data-total-time]',

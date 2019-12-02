@@ -15,7 +15,11 @@ Devtool to profile and visualize liquid performance.
 The Shopify Devtool tab will only show up when you're on your Shopify store.
 If you see an error saying `This page cannot be profiled` it may be because:
 1. You are not currently on a Shopify store.
-2. The checkout flow is not meant to be profiled using this extension.
+2. You might be trying to profile a checkout page, which is not supported by this extension.
+3. There was an unhandled error in the request, e.g. timeout, lost connection, etc.
+
+If it was none of the errors above you can right click, inspect page, and view console for error details.
+If you find a bug please open an issue [here](https://github.com/Shopify/shopify-devtools/issues/new).
 
 
 ## Contributing

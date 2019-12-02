@@ -1,6 +1,6 @@
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
-import {toggleClass, getProfileData, setTotalTime} from './utils';
+import {getProfileData, setTotalTime} from './utils';
 
 import './styles/main.css';
 
@@ -30,21 +30,22 @@ chrome.devtools.inspectedWindow.eval(
 
 async function refreshPanel() {
   document.querySelector(selectors.initialMessage)!.innerHTML = '';
-  toggleClass(selectors.flamegraphWrapper, 'loading-fade');
-  toggleClass(selectors.loadingAnimation, 'hide');
+  document
+    .querySelector(selectors.flamegraphWrapper)!
+    .classList.add('loading-fade');
+  document.querySelector(selectors.loadingAnimation)!.classList.remove('hide');
   document.querySelector(selectors.notProfilableMessage)!.classList.add('hide');
+  let profile: FormattedProfileData;
 
-  const profile = await getProfileData();
-
-  toggleClass(selectors.loadingAnimation, 'hide');
-  toggleClass(selectors.flamegraphWrapper, 'loading-fade');
-
-  if (profile) {
+  try {
+    profile = await getProfileData();
     liquidFlamegraph = new LiquidFlamegraph(
       document.querySelector(selectors.flamegraphContainer),
       profile,
     );
 
+    // All events happening here are synchronous. The set timeout is for UI
+    // purposes so that timing information gets displayed after the flamegraph is shown.
     setTimeout(function() {
       setTotalTime(profile.value);
     }, 300);
@@ -52,12 +53,18 @@ async function refreshPanel() {
     document
       .querySelector(selectors.flamegraphWrapper)!
       .classList.remove('hide');
-  } else {
+  } catch (error) {
+    console.error(error);
     document.querySelector(selectors.flamegraphWrapper)!.classList.add('hide');
     document
       .querySelector(selectors.notProfilableMessage)!
       .classList.remove('hide');
   }
+
+  document.querySelector(selectors.loadingAnimation)!.classList.add('hide');
+  document
+    .querySelector(selectors.flamegraphWrapper)!
+    .classList.remove('loading-fade');
 }
 
 function zoomOutFlamegraph() {
