@@ -6,24 +6,39 @@
 
 <body>
   <div class="toolbar">
-    <img data-refresh-button class="refresh" src="images/refresh-arrow.png">
-    <div class="divider"></div>
-    <img data-zoom-out-button class="zoom-out" src="images/zoom-out.png">
+    <div class="toolbar__button-group">
+        <button data-refresh-button class="toolbar__button">
+            <span class="toolbar__button-icon toolbar__button-icon--refresh">
+                <img inline src="images/refresh-arrow.svg">
+            </span>
+            <div data-refresh-tooltip class="toolbar__tooltip hide">
+              <span>Load Profile</span>
+            </div>
+        </button>
+
+        <div class="toolbar__divider"></div>
+
+        <button data-refresh-button class="toolbar__button">
+          <span data-zoom-out-button class="toolbar__button-icon toolbar__button-icon--zoom-out">
+            <img inline src="images/zoom-out.svg">
+          </span>
+          <div data-zoom-out-tooltip class="toolbar__tooltip hide">
+            <span>Reset Flamegraph Zoom</span>
+          </div>
+        </button>
+
+    </div>
   </div>
 
-  <div data-refresh-tooltip class="tooltip hide">
-    <p>Load Profile</p>
-  </div>
 
-  <div data-zoom-out-tooltip class="tooltip hide">
-    <p>Reset Flamegraph Zoom</p>
-  </div>
+
+
 
   <div data-loading-animation class="wrap-loader hide"><div class="loader"></div></div>
 
   <div data-initial-message class="initial-message" >
     <h2 class="initial">No profiling recorded yet</h2>
-    <p>Press the <img class="refresh-icon" src="images/refresh-arrow.png"> button to get started</p>
+    <p>Press the <span class="refresh-icon"><img inline src="images/refresh-arrow.svg"></span> button to get started</p>
   </div>
 
   <div data-flamegraph-container class="chart"></div>

@@ -20,6 +20,7 @@ body {
 }
 
 .refresh-icon {
+  display: inline-block;
   height: 11px;
   width: 11px;
 }
