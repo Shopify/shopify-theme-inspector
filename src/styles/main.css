@@ -10,7 +10,7 @@ body {
   margin: 20px 20px;
 }
 
-.initial-message {
+.centered-message {
   position: fixed;
   top: 50%;
   left: 50%;
@@ -58,4 +58,12 @@ body {
   background-color: rgb(243, 243, 243);
   border: 1px solid rgb(208, 208, 208);
   padding: 4px;
+}
+
+.warning-sign {
+  width: 50px;
+}
+
+.loading-fade {
+  opacity: 0.6;
 }

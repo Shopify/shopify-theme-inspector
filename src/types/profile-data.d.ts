@@ -23,3 +23,11 @@ interface FormattedProfileNode {
   code: string;
   line: number;
 }
+
+interface FormattedProfileData {
+  name: string;
+  value: number;
+  children: FormattedProfileNode[];
+  code: string;
+  line: string;
+}
