@@ -3,12 +3,17 @@ import {isDev, Oauth2, getCurrentTabURL} from './utils';
 
 const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
 
-const identityDomain = isDev ? env.DEV_OAUTH2_DOMAIN : env.OAUTH2_DOMAIN;
-const clientId = isDev ? env.DEV_OAUTH2_CLIENT_ID : env.OAUTH2_CLIENT_ID;
-const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
+async function getOauth2Client() {
+  const identityDomain = (await isDev())
+    ? env.DEV_OAUTH2_DOMAIN
+    : env.OAUTH2_DOMAIN;
+  const clientId = (await isDev())
+    ? env.DEV_OAUTH2_CLIENT_ID
+    : env.OAUTH2_CLIENT_ID;
+  const clientAuthParams = [['scope', `openid profile ${DEVTOOLS_SCOPE}`]];
 
-const clientAuthParams = [['scope', `openid profile email ${DEVTOOLS_SCOPE}`]];
-const oauth2 = new Oauth2(clientId, identityDomain, {clientAuthParams});
+  return new Oauth2(clientId, identityDomain, {clientAuthParams});
+}
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
 // been detected
@@ -30,8 +35,9 @@ function setIconAndPopup(active: string, tabId: number) {
   chrome.pageAction.show(tabId);
 }
 
-chrome.runtime.onMessage.addListener(event => {
+chrome.runtime.onMessage.addListener(async event => {
   if (event.type === 'signOut') {
+    const oauth2 = await getOauth2Client();
     oauth2.logoutUser();
   }
 });
@@ -53,6 +59,7 @@ chrome.runtime.onMessage.addListener(async event => {
   }
 
   try {
+    const oauth2 = await getOauth2Client();
     await oauth2.authenticate();
   } catch (error) {
     console.log('Authentication Error:', error.message);
@@ -67,8 +74,11 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
     return false;
   }
 
-  getCurrentTabURL()
-    .then(({origin}) => {
+  Promise.all([getCurrentTabURL(), getOauth2Client(), isDev()])
+    .then(([{origin}, oauth2, isDev]) => {
+      const subjectId = isDev
+        ? env.DEV_OAUTH2_SUBJECT_ID
+        : env.OAUTH2_SUBJECT_ID;
       const params = [
         ['destination', `${origin}/admin`],
         ['scope', DEVTOOLS_SCOPE],
@@ -90,8 +100,10 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
   if (event.type !== 'request-user-name') return false;
 
-  oauth2
-    .getUserInfo()
+  getOauth2Client()
+    .then(oauth2 => {
+      return oauth2.getUserInfo();
+    })
     .then(userInfo => {
       const name = userInfo.given_name;
       sendResponse({name});
@@ -107,8 +119,12 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 // with a boolean of user login status.
 chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
   if (event.type !== 'request-auth-status') return false;
-  oauth2
-    .hasValidClientToken()
+
+  getOauth2Client()
+    .then(oauth2 => {
+      return oauth2.hasValidClientToken();
+    })
+
     .then(isLoggedIn => {
       sendResponse({isLoggedIn});
     })
