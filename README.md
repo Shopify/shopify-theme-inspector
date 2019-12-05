@@ -15,10 +15,10 @@ A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so
 4. Click the `↻` **Load Profile Button** to collect profiling data and view the Liquid profiling flamegraph. Click [here](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description) for more contexts on flamegraphs and how to read them.
 
 ## FAQ
-**I'm not seeing the Shopify tab in Chrome DevTools**
-🙋‍♀️ The Shopify Theme Inspector tab will only show up when viewing a page on a Shopify Online Store.
+### I'm not seeing the Shopify tab in Chrome DevTools
+The Shopify Theme Inspector tab will only show up when viewing a page on a Shopify Online Store.
 
-**I received an error page which says "This page cannot be profiled."**
+### I received an error page which says "This page cannot be profiled."
 
 If you see this error, it may be because of one of the following conditions:
   * You are not currently on a Shopify store.
