@@ -2,7 +2,7 @@
 
 A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so you can triage long-running code and reduce server response times.
 
-￼￼￼![Elements](https://user-images.githubusercontent.com/4837696/70237572-7dd46b00-1735-11ea-82c7-54cbd2306295.png)
+![Elements](https://user-images.githubusercontent.com/4837696/70237825-018e5780-1736-11ea-9fda-3691e73abf28.png)
 
 ## Install
 1. Install the [Shopify Theme Inspector for Chrome](https://chrome.google.com/webstore/detail/shopify-devtools/fndnankcflemoafdeboboehphmiijkgp) extension from the Chrome web store.
