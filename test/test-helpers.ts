@@ -1,3 +1,4 @@
+import manifest from '../src/manifest.json';
 import {mockProfileData} from './mock-data/mock-profile-data';
 import openIdConfiguration from './mock-data/openid-configuration.json';
 import {mockAccessToken} from './mock-data/mock-access-token';
@@ -45,7 +46,7 @@ export async function getExtensionId(): Promise<string> {
   const dummyPage = await browser.newPage();
   await dummyPage;
 
-  const extensionName = 'Shopify DevTools';
+  const extensionName = manifest.name;
 
   const targets = await browser.targets();
   // @ts-ignore

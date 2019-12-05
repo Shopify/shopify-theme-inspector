@@ -1,5 +1,6 @@
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const HtmlWebpackInlineSVGPlugin = require('html-webpack-inline-svg-plugin');
 const {CleanWebpackPlugin} = require('clean-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
@@ -49,6 +50,7 @@ module.exports = {
       template: 'src/popupNotShopifyStore.html',
       chunks: ['popup'],
     }),
+    new HtmlWebpackInlineSVGPlugin(),
     new CopyPlugin(
       [{from: 'src/manifest.json'}, {from: 'src/images', to: 'images'}],
       {copyUnmodified: true},
