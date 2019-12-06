@@ -9,7 +9,7 @@ import {
 import {saveToLocalStorage, getFromLocalStorage, clearLocalStorage} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
-// This makes sure token does not expire after checking and in between making the request
+// This makes sure token does not expire between checking validity and making the request
 const TOKEN_EXPIRATION_SAFETY_BUFFER = 60000;
 
 interface Oauth2Options {
@@ -88,13 +88,39 @@ export class Oauth2 {
     return false;
   }
 
-  public logoutUser() {
+  public async logoutUser() {
+    const token = await this.getAccessTokenFromStorage(this.clientId);
+    const idToken = await getFromLocalStorage('idToken');
+    const config = await this.getConfig();
+
+    // This base url changes according to development or production environment
+    const baseUrl = config.issuer;
+
+    // This endpoint is hard coded because it is not standard oauth
+    const url = new URL(`${baseUrl}/api/v1/logout`);
+
+    if (!idToken) {
+      throw Error('Logout id token not found');
+    }
+
+    url.search = new URLSearchParams([['id_token_hint', idToken]]).toString();
+    const response = await fetch(url.href, {
+      method: 'delete',
+      headers: {Authorization: `Bearer ${token!.accessToken}`},
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      throw Error(json.error);
+    }
+
     this.deleteAccessToken();
   }
 
   public async getUserInfo(): Promise<UserInfo> {
     const config = await this.getConfig();
-    const token = await this.authenticate();
+    const token = await this.getAccessTokenFromStorage(this.clientId);
     const url = new URL(config.userinfo_endpoint);
     const response = await fetch(url.href, {
       headers: {Authorization: `Bearer ${token!.accessToken}`},
@@ -345,6 +371,10 @@ export class Oauth2 {
       ? new Date(responseDateHeader).valueOf()
       : new Date().valueOf();
     const body: TokenResponseBody = await response.json();
+
+    if (body.id_token) {
+      saveToLocalStorage('idToken', body.id_token);
+    }
 
     return {
       accessToken: body.access_token,

@@ -49,10 +49,13 @@ if (signInButton) {
 
 if (signOutButton) {
   signOutButton.addEventListener('click', () => {
-    chrome.runtime.sendMessage({
-      type: 'signOut',
+    chrome.runtime.sendMessage({type: 'signOut'}, payload => {
+      if (payload && payload.error) {
+        console.error('Logout error:', payload.error);
+      } else {
+        setSignInPopup();
+      }
     });
-    setSignInPopup();
   });
 }
 
