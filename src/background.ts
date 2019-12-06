@@ -35,11 +35,20 @@ function setIconAndPopup(active: string, tabId: number) {
   chrome.pageAction.show(tabId);
 }
 
-chrome.runtime.onMessage.addListener(async event => {
-  if (event.type === 'signOut') {
-    const oauth2 = await getOauth2Client();
-    oauth2.logoutUser();
-  }
+chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
+  if (event.type !== 'signOut') return false;
+
+  getOauth2Client()
+    .then(oauth2 => {
+      return oauth2.logoutUser();
+    })
+    .then(() => {
+      sendResponse();
+    })
+    .catch(({message}) => {
+      sendResponse({error: message});
+    });
+  return true;
 });
 
 // Create a listener which handles when detectShopify.js, which executes in the

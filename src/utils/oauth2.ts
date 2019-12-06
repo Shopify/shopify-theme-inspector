@@ -10,8 +10,8 @@ import {
   saveToLocalStorage,
   getFromLocalStorage,
   clearLocalStorage,
-  saveIdTokenToLocalStorage,
-  getIdTokenFromStorage,
+  // saveIdTokenToLocalStorage,
+  // getIdTokenFromStorage,
 } from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
@@ -96,7 +96,7 @@ export class Oauth2 {
 
   public async logoutUser() {
     const token = await this.getAccessTokenFromStorage(this.clientId);
-    const idToken = await getIdTokenFromStorage();
+    const idToken = await getFromLocalStorage('idToken');
     const config = await this.getConfig();
 
     // This base url changes according to development or production environment
@@ -105,21 +105,23 @@ export class Oauth2 {
     // This endpoint is hard coded because it is not standard oauth
     const url = new URL(`${baseUrl}/api/v1/logout`);
 
-    if (idToken) {
-      url.search = new URLSearchParams([['id_token_hint', idToken]]).toString();
+    if (!idToken) {
+      throw Error('Logout id token not found');
     }
 
+    url.search = new URLSearchParams([['id_token_hint', idToken]]).toString();
     const response = await fetch(url.href, {
       method: 'delete',
       headers: {Authorization: `Bearer ${token!.accessToken}`},
     });
 
-    if (response.ok) {
-      this.deleteAccessToken();
-      return true;
+    const json = await response.json();
+
+    if (!response.ok) {
+      throw Error(json.error);
     }
 
-    throw Error(response.statusText);
+    this.deleteAccessToken();
   }
 
   public async getUserInfo(): Promise<UserInfo> {
@@ -377,7 +379,7 @@ export class Oauth2 {
     const body: TokenResponseBody = await response.json();
 
     if (body.id_token) {
-      saveIdTokenToLocalStorage(body.id_token);
+      saveToLocalStorage('idToken', body.id_token);
     }
 
     return {
