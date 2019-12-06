@@ -2,15 +2,21 @@ import nullthrows from 'nullthrows';
 import {AccessToken} from 'types';
 import {getCurrentTabURL} from '.';
 
-export async function getProfileData(): Promise<FormattedProfileData> {
+export async function getProfileData(
+  withAuthorization = true,
+): Promise<FormattedProfileData> {
   const parser = new DOMParser();
-  const {accessToken} = await requestAccessToken();
+
   const url = await getCurrentTabURL();
+  const fetchOptions = {} as any;
+
+  if (withAuthorization) {
+    const {accessToken} = await requestAccessToken();
+    fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
+  }
 
   url.searchParams.set('profile_liquid', 'true');
-  const response = await fetch(url.href, {
-    headers: {Authorization: `Bearer ${accessToken}`},
-  });
+  const response = await fetch(url.href, fetchOptions);
 
   if (!response.ok) throw Error(response.statusText);
 

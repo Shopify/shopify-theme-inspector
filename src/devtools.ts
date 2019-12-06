@@ -38,7 +38,14 @@ async function refreshPanel() {
   let profile: FormattedProfileData;
 
   try {
-    profile = await getProfileData();
+    try {
+      profile = await getProfileData();
+    } catch (error) {
+      // If authorized request fails,log it, and make a request without auth just in case the profile_liquid beta flag is enabled.
+      console.error(error);
+      profile = await getProfileData(false);
+    }
+
     liquidFlamegraph = new LiquidFlamegraph(
       document.querySelector(selectors.flamegraphContainer),
       profile,
