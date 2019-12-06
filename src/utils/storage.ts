@@ -21,26 +21,6 @@ export function getFromLocalStorage(key: string): Promise<string | undefined> {
   });
 }
 
-export function saveIdTokenToLocalStorage(value: string) {
-  const key = 'idToken';
-
-  return new Promise(resolve => {
-    chrome.storage.local.set({[key]: value}, function() {
-      resolve();
-    });
-  });
-}
-
-export function getIdTokenFromStorage(): Promise<string | undefined> {
-  const key = 'idToken';
-
-  return new Promise(resolve => {
-    chrome.storage.local.get([key], function(data) {
-      return resolve(data[key]);
-    });
-  });
-}
-
 export function clearLocalStorage() {
   chrome.storage.local.clear();
 }

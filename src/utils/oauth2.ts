@@ -6,13 +6,7 @@ import {
   TokenIntrospection,
   UserInfo,
 } from '../types';
-import {
-  saveToLocalStorage,
-  getFromLocalStorage,
-  clearLocalStorage,
-  // saveIdTokenToLocalStorage,
-  // getIdTokenFromStorage,
-} from '.';
+import {saveToLocalStorage, getFromLocalStorage, clearLocalStorage} from '.';
 
 const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
 // This makes sure token does not expire between checking validity and making the request
