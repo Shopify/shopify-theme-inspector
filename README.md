@@ -5,7 +5,7 @@ A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so
 ![Elements](https://user-images.githubusercontent.com/4837696/70237825-018e5780-1736-11ea-9fda-3691e73abf28.png)
 
 ## Install
-Visit the Chrome Web Store and install the [Shopify Theme Inspector for Chrome](https://chrome.google.com/webstore/detail/shopify-devtools/fndnankcflemoafdeboboehphmiijkgp).
+Visit the Chrome Web Store and install the [Shopify Theme Inspector for Chrome](https://chrome.google.com/webstore/detail/shopify-theme-inspector-f/fndnankcflemoafdeboboehphmiijkgp).
 
 ## How to use
 1. Navigate to any page of your Shopify Online store.
