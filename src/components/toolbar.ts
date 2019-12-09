@@ -1,5 +1,3 @@
-import '../styles/toolbar.css';
-
 const selectors = {
   refreshButton: '[data-refresh-button]',
   zoomOutButton: '[data-zoom-out-button]',

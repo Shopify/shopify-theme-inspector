@@ -1,8 +1,8 @@
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
-import {getProfileData, setTotalTime} from './utils';
+import {getProfileData, setTotalTime, getBrowserTheme} from './utils';
 
-import './styles/main.css';
+import './styles/devtools.css';
 
 const selectors = {
   refreshButton: '[data-refresh-button]',
@@ -21,6 +21,10 @@ chrome.devtools.inspectedWindow.eval(
     if (isShopifyStore) {
       chrome.devtools.panels.create('Shopify', '', './devtools.html');
       const toolbar = new Toolbar();
+
+      if (getBrowserTheme() === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+      }
 
       toolbar.refreshButton.addEventListener('click', refreshPanel);
       toolbar.zoomOutButton.addEventListener('click', zoomOutFlamegraph);
