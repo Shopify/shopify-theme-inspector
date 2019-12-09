@@ -182,12 +182,7 @@ export class Oauth2 {
         try {
           token = await this.refreshClientAccessToken(id, token.refreshToken);
         } catch (error) {
-          // If refresh token is rejected
-          if (error.contains('401')) {
-            token = await cb.call(this, id, params);
-          } else {
-            throw error;
-          }
+          token = await cb.call(this, id, params);
         }
       } else {
         // No refresh token so request a new access token
