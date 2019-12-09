@@ -1,22 +1,26 @@
 .popup {
-  width: 200px;
-  padding: 0px 5px;
+  width: 215px;
+  padding: 10px 5px;
 }
 
-.sign-in-button {
+.popup-button {
   padding: 7px;
   background-color: #5867C3;
   border: 0px;
-  display: flex;
+  display: block;
   margin: 0 auto;
   color: white;
   font-size: 13px;
+  height: 34px;
+  width: 70px;
+  text-align: center;
 }
 
 .shopify-logo {
   width: 100px;
   margin: 0 auto;
   display: flex;
+  margin-bottom: 15px;
 }
 
 .faded-hr {
@@ -30,5 +34,19 @@
 
 .hide {
   display: none;
+}
+
+.loader {
+  border: 4px solid #f3f3f3; /* Light grey */
+  border-top: 4px solid #3498db; /* Blue */
+  border-radius: 80%;
+  width: 12px;
+  height: 12px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
