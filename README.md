@@ -16,7 +16,7 @@ Visit the Chrome Web Store and install the [Shopify Theme Inspector for Chrome](
 
 ## FAQ
 ### Can I profile any Shopify store I want?
-No, you can only profile stores that are linked to your Shopify account. If you can't log into the store admin with you Shopify account, you won't be able to request profiling data.
+No, you can only profile stores that are linked to your [single login Shopify account](https://help.shopify.com/en/manual/your-account/logging-in/sso-migration-guide). If you can't log into the store admin with you Shopify account, you won't be able to request profiling data.
 
 ### I'm not seeing the Shopify tab in Chrome DevTools
 The Shopify Theme Inspector tab will only show up when viewing a page on a Shopify Online Store.
