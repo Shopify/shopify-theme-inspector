@@ -62,17 +62,24 @@ chrome.runtime.onMessage.addListener((event, sender) => {
 
 // Create a listener which handles when the Sign In button is click from the popup
 // or DevTools panel.
-chrome.runtime.onMessage.addListener(async event => {
+chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
   if (event.type !== 'authenticate') {
-    return;
+    return false;
   }
 
-  try {
-    const oauth2 = await getOauth2Client();
-    await oauth2.authenticate();
-  } catch (error) {
-    console.log('Authentication Error:', error.message);
-  }
+  getOauth2Client()
+    .then(oauth2 => {
+      return oauth2.authenticate();
+    })
+    .then(() => {
+      sendResponse({success: true});
+    })
+    .catch(error => {
+      console.log('Authentication Error:', error.message);
+      sendResponse({success: false, error});
+    });
+
+  return true;
 });
 
 // Listen for 'request-core-access-token' event and respond to the messenger
