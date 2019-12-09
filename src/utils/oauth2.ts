@@ -195,8 +195,8 @@ export class Oauth2 {
   }
 
   /**
-   * Try to get the associated from storage or request a new token using the
-   * provided callback method.
+   * Try to get the associated subject access token from storage or request a
+   * new token using the provided callback method.
    *
    * @param destination - Unique ID of the application we're getting a token for
    * @param scope - The scope of the token
