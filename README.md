@@ -15,6 +15,9 @@ Visit the Chrome Web Store and install the [Shopify Theme Inspector for Chrome](
 4. Click the `↻` **Load Profile Button** to collect profiling data and view the Liquid profiling flamegraph. Click [here](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description) for more contexts on flamegraphs and how to read them.
 
 ## FAQ
+### Can I profile any Shopify store I want?
+No, you can only profile stores that are linked to your Shopify account. If you can't log into the store admin with you Shopify account, you won't be able to request profiling data.
+
 ### I'm not seeing the Shopify tab in Chrome DevTools
 The Shopify Theme Inspector tab will only show up when viewing a page on a Shopify Online Store.
 
