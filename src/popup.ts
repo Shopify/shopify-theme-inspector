@@ -4,6 +4,7 @@ const selectors = {
   popupSignedIn: '[data-popup-signed-in]',
   popupSignIn: '[data-popup-sign-in]',
   popupSignedInPrompt: '[data-signed-in-prompt]',
+  loadingAnimation: '[data-loading-animation]',
 };
 
 const popupSignedIn = document.querySelector(selectors.popupSignedIn);
@@ -51,6 +52,8 @@ if (signInButton) {
         }
       },
     );
+    signInButton.innerHTML =
+      '<div data-loading-animation class="loader" style="display: inline-block"></div>';
   });
 }
 
@@ -63,6 +66,8 @@ if (signOutButton) {
         setSignInPopup();
       }
     });
+    signOutButton.innerHTML =
+      '<div data-loading-animation class="loader" style="display: inline-block"></div>';
   });
 }
 
