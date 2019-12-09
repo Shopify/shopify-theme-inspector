@@ -41,9 +41,16 @@ async function setupPopupWindow() {
 
 if (signInButton) {
   signInButton.addEventListener('click', () => {
-    chrome.runtime.sendMessage({
-      type: 'authenticate',
-    });
+    chrome.runtime.sendMessage(
+      {
+        type: 'authenticate',
+      },
+      payload => {
+        if (payload.success) {
+          setSignedInPopup();
+        }
+      },
+    );
   });
 }
 
