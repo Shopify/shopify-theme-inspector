@@ -10,9 +10,12 @@ async function getOauth2Client() {
   const clientId = (await isDev())
     ? env.DEV_OAUTH2_CLIENT_ID
     : env.OAUTH2_CLIENT_ID;
+  const subjectId = (await isDev())
+    ? env.DEV_OAUTH2_SUBJECT_ID
+    : env.OAUTH2_SUBJECT_ID;
   const clientAuthParams = [['scope', `openid profile ${DEVTOOLS_SCOPE}`]];
 
-  return new Oauth2(clientId, identityDomain, {clientAuthParams});
+  return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
 }
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
@@ -90,16 +93,11 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
     return false;
   }
 
-  Promise.all([getCurrentTabURL(), getOauth2Client(), isDev()])
-    .then(([{origin}, oauth2, isDev]) => {
-      const subjectId = isDev
-        ? env.DEV_OAUTH2_SUBJECT_ID
-        : env.OAUTH2_SUBJECT_ID;
-      const params = [
-        ['destination', `${origin}/admin`],
-        ['scope', DEVTOOLS_SCOPE],
-      ];
-      return oauth2.getSubjectAccessToken(subjectId, params);
+  Promise.all([getCurrentTabURL(), getOauth2Client()])
+    .then(([{origin}, oauth2]) => {
+      const params = [['scope', DEVTOOLS_SCOPE]];
+      const destination = `${origin}/admin`;
+      return oauth2.getSubjectAccessToken(destination, params);
     })
     .then(token => {
       sendResponse({token});
