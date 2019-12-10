@@ -10,7 +10,7 @@ Visit the Chrome Web Store and install the [Shopify Theme Inspector for Chrome](
 ## How to use
 1. Navigate to any page of your Shopify Online store.
 1. Click the Shopify icon in the top right corner of your browser (the extension) and log into your Shopify account to authenticate yourself as an admin or staff member of the store.
-2. Open Chrome DevTools using `command(⌘) + shift + C` on a Mac and `control + shift + J` for Windows.
+2. [Open Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/open).
 3. Navigate to the Shopify panel which should be visible in the same tab group as `Elements` and `Network`. If it is not visible click the `>>` icon to the right of the panel names and select Shopify.
 4. Click the `↻` **Load Profile Button** to collect profiling data and view the Liquid profiling flamegraph. Click [here](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description) for more contexts on flamegraphs and how to read them.
 
