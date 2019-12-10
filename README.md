@@ -8,32 +8,35 @@ A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so
 Visit the Chrome Web Store and install the [Shopify Theme Inspector for Chrome](https://chrome.google.com/webstore/detail/shopify-theme-inspector-f/fndnankcflemoafdeboboehphmiijkgp).
 
 ## How to use
-1. Navigate to any page of your Shopify Online store.
-1. Click the Shopify icon in the top right corner of your browser (the extension) and log into your Shopify account to authenticate yourself as an admin or staff member of the store.
+> 🙋‍♀️ In order to proceed, you will need a [Shopify single login account](https://help.shopify.com/en/manual/your-account/logging-in/sso-migration-guide).
+
+1. Navigate to your Shopify store.
 2. [Open Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/open).
-3. Navigate to the Shopify panel which should be visible in the same tab group as `Elements` and `Network`. If it is not visible click the `>>` icon to the right of the panel names and select Shopify.
-4. Click the `↻` **Load Profile Button** to collect profiling data and view the Liquid profiling flamegraph. Click [here](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description) for more contexts on flamegraphs and how to read them.
+3. Navigate to the Shopify tab, located in the top group of tabs in Chrome DevTools.
+4. Click the **↻** (Load Profile Button) to request and view your Liquid profile [flamegraph](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description).
 
 ## FAQ
 ### Can I profile any Shopify store I want?
-No, you can only profile stores that are linked to your [single login Shopify account](https://help.shopify.com/en/manual/your-account/logging-in/sso-migration-guide). If you can't log into the store admin with you Shopify account, you won't be able to request profiling data.
+No, you can only profile stores that are linked to your [single login Shopify account](https://help.shopify.com/en/manual/your-account/logging-in/sso-migration-guide). If you can't log into the store admin with your Shopify account, you won't be able to request profiling data.
 
 ### I'm not seeing the Shopify tab in Chrome DevTools
-The Shopify Theme Inspector tab will only show up when viewing a page on a Shopify Online Store.
+The Shopify tab will only show when viewing a Shopify Online Store.
 
 ### I received an error page which says "This page cannot be profiled."
 
 If you see this error, it may be because of one of the following conditions:
-  * You are not currently on a Shopify store.
+  * Your account does not have access to the current store you are trying to profile.
   * You might be trying to profile a checkout page, which is not supported by this extension.
   * There was an unhandled error in the request, e.g. timeout, lost connection, etc.
 
-If it was none of the errors above you can right click, inspect page, and view console for error details.
+If it was none of the errors above you can right click on Shopify DevTools , inspect page, and view console for error details.
 
 ## Contributing
+To learn more about how to contribute to this project check out the [contributing](https://github.com/Shopify/shopify-devtools/blob/master/CONTRIBUTING.md) documentation.
+
 If you find a bug please open an issue [here](https://github.com/Shopify/shopify-devtools/issues/new).
 
-If you would like to request a feature checkout out the [feature request](https://github.com/Shopify/shopify-devtools/blob/master/FEATURE_REQUEST.md) documentation.
+If you would like to request a feature, checkout out the [feature request](https://github.com/Shopify/shopify-devtools/blob/master/FEATURE_REQUEST.md) documentation.
 
-To learn more about how to contribute to this project check out the [contributing](https://github.com/Shopify/shopify-devtools/blob/master/CONTRIBUTING.md) documentation.
+
 
