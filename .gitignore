@@ -4,3 +4,5 @@ node_modules/
 coverage
 *.zip
 .DS_Store
+bundleAnalyzer.json
+package-lock.json

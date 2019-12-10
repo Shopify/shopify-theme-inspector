@@ -1,7 +1,7 @@
 {
-  "name": "shopify-devtool",
+  "name": "shopify-theme-inspector",
   "version": "1.0.0",
-  "description": "",
+  "description": "A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so you can triage long-running code and reduce server response times!",
   "main": "src/background.ts",
   "scripts": {
     "lint": "eslint '**/*.{ts,tsx}'",
@@ -9,40 +9,38 @@
     "test:watch": "jest --watch",
     "build": "webpack --config webpack.prod.js",
     "start": "webpack --config webpack.dev.js",
-    "zip": "yarn build && cd dist && zip -r -X ../shopify_devtools.zip ."
+    "zip": "yarn build && cd dist && zip -r -X ../shopify_devtools.zip .",
+    "bundle-report": "yarn build && webpack-bundle-analyzer --port 4200 bundleAnalyzer.json"
   },
   "engines": {
     "node": ">=10.16.3"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Shopify/shopify-devtools.git"
+    "url": "git+https://github.com/Shopify/shopify-theme-inspector.git"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Shopify Inc.",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Shopify/shopify-devtools/issues"
+    "url": "https://github.com/Shopify/shopify-theme-inspector/issues"
   },
-  "homepage": "https://github.com/Shopify/shopify-devtools#readme",
+  "homepage": "https://github.com/Shopify/shopify-theme-inspector#readme",
   "dependencies": {
-    "@types/d3": "^5.7.2",
-    "@types/jsdom": "^12.2.4",
-    "auth0-chrome": "^0.1.2",
-    "autobind-decorator": "^2.4.0",
-    "copy-webpack-plugin": "^5.0.4",
     "d3": "^5.12.0",
     "d3-flame-graph": "^2.1.2",
-    "jsdom": "^15.2.0",
     "lodash": "^4.17.15",
     "nullthrows": "^1.1.1"
   },
   "devDependencies": {
     "@types/chrome": "^0.0.91",
+    "@types/d3": "^5.7.2",
     "@types/jest": "^24.0.21",
     "@types/jest-environment-puppeteer": "^4.3.1",
+    "@types/jsdom": "^12.2.4",
     "@types/lodash": "^4.14.144",
     "@types/puppeteer": "^1.20.2",
     "clean-webpack-plugin": "^3.0.0",
+    "copy-webpack-plugin": "^5.0.4",
     "css-loader": "^3.2.0",
     "eslint": "^6.5.1",
     "eslint-plugin-shopify": "^30.0.1",
@@ -52,7 +50,7 @@
     "jest": "^24.9.0",
     "jest-fetch-mock": "^2.1.2",
     "jest-puppeteer": "^4.3.0",
-    "lodash": "^4.17.15",
+    "jsdom": "^15.2.0",
     "mini-css-extract-plugin": "^0.8.0",
     "prettier": "^1.18.2",
     "puppeteer": "^1.20.0",
@@ -62,6 +60,7 @@
     "ts-loader": "^6.2.0",
     "typescript": "^3.6.3",
     "webpack": "^4.41.0",
+    "webpack-bundle-analyzer": "^3.6.0",
     "webpack-cli": "^3.3.9",
     "webpack-merge": "^4.2.2"
   }
