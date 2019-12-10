@@ -13,7 +13,7 @@ A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so
 1. Navigate to your Shopify store.
 2. [Open Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/open).
 3. Navigate to the Shopify tab, located in the top group of tabs in Chrome DevTools.
-4. Click the **↻** (Load Profile Button) to request and view your Liquid profile [flamegraph](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description).
+4. Click the **↻** (Load Profile) button to request and view your Liquid profile [flamegraph](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description).
 
 ## FAQ
 ### Can I profile any Shopify store I want?
