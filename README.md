@@ -34,9 +34,9 @@ If it was none of the errors above you can right click on Shopify DevTools , ins
 ## Contributing
 To learn more about how to contribute to this project check out the [contributing](https://github.com/Shopify/shopify-devtools/blob/master/CONTRIBUTING.md) documentation.
 
-If you find a bug please open an issue [here](https://github.com/Shopify/shopify-devtools/issues/new).
+If you find a bug please [open an issue](https://github.com/Shopify/shopify-devtools/issues/new).
 
-If you would like to request a feature, checkout out the [feature request](https://github.com/Shopify/shopify-devtools/blob/master/FEATURE_REQUEST.md) documentation.
+If you would like to request a feature, check out the [feature request documentation](https://github.com/Shopify/shopify-devtools/blob/master/FEATURE_REQUEST.md).
 
 ## Shopify Employees
 View the [internal documentation](https://docs.google.com/document/d/1VIO8XA6Jmk5IvgQwE8RQ263o2fBelSMhFCIkbMhgU14/edit) for more details on internal usage, development, and publishing new releases.
