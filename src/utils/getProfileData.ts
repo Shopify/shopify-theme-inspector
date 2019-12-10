@@ -1,5 +1,5 @@
 import nullthrows from 'nullthrows';
-import {AccessToken} from 'types';
+import {SubjectAccessToken} from 'types';
 import {getCurrentTabURL} from '.';
 
 export async function getProfileData(
@@ -38,7 +38,7 @@ function noProfileFound(document: HTMLDocument) {
   return document.querySelector('#liquidProfileData') === null;
 }
 
-function requestAccessToken(): Promise<AccessToken> {
+function requestAccessToken(): Promise<SubjectAccessToken> {
   return new Promise((resolve, reject) => {
     return chrome.runtime.sendMessage(
       {type: 'request-core-access-token'},

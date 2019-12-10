@@ -43,11 +43,12 @@ async function refreshPanel() {
 
   try {
     try {
-      profile = await getProfileData();
-    } catch (error) {
-      // If authorized request fails,log it, and make a request without auth just in case the profile_liquid beta flag is enabled.
-      console.error(error);
+      // Try first to make an unauthorized request if the beta flag is enabled
       profile = await getProfileData(false);
+    } catch (error) {
+      // If no profiling data exists in first request, try an authorized request
+      console.error(error);
+      profile = await getProfileData();
     }
 
     liquidFlamegraph = new LiquidFlamegraph(

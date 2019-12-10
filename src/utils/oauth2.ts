@@ -1,8 +1,10 @@
 import crypto from 'crypto';
 import {
   OpenIdConfig,
-  AccessToken,
-  TokenResponseBody,
+  ClientAccessToken,
+  ClientTokenResponseBody,
+  SubjectAccessToken,
+  SubjectTokenResponseBody,
   TokenIntrospection,
   UserInfo,
 } from '../types';
@@ -28,16 +30,19 @@ const DEFAULT_OPTIONS: Oauth2Options = {
 
 export class Oauth2 {
   clientId: string;
+  subjectId: string;
   domain: string;
   options: Oauth2Options;
   config?: OpenIdConfig;
 
   public constructor(
     clientId: string,
+    subjectId: string,
     domain: string,
     options: Oauth2OptionsArgument,
   ) {
     this.clientId = clientId;
+    this.subjectId = subjectId;
     this.domain = domain;
     this.options = {...DEFAULT_OPTIONS, ...options};
   }
@@ -45,14 +50,13 @@ export class Oauth2 {
   /**
    * Request a new oauth2 access token from the clientId and clientScope specified in the constructor
    */
-  public authenticate(params: string[][] = []): Promise<AccessToken> {
+  public authenticate(params: string[][] = []): Promise<ClientAccessToken> {
     const {clientId} = this;
     const {clientAuthParams} = this.options;
-    return this.getValidAccessTokenAndSave(
-      clientId,
-      [...clientAuthParams, ...params],
-      this.getNewAccessToken,
-    );
+    return this.getValidClientAccessTokenAndSave(clientId, [
+      ...clientAuthParams,
+      ...params,
+    ]);
   }
 
   /**
@@ -63,21 +67,17 @@ export class Oauth2 {
    * @param scope - The scope we want for the token if we need to request a new one
    */
   public getSubjectAccessToken(
-    subjectId: string,
+    destination: string,
     params: string[][],
-  ): Promise<AccessToken> {
-    return this.getValidAccessTokenAndSave(
-      subjectId,
-      params,
-      this.exchangeToken,
-    );
+  ): Promise<SubjectAccessToken> {
+    return this.getValidSubjectAccessTokenAndSave(destination, params);
   }
 
   /*
    * Check to see if client token exists in local and is valid
    */
   public async hasValidClientToken(): Promise<Boolean> {
-    const token = await this.getAccessTokenFromStorage(this.clientId);
+    const token = await this.getClientAccessTokenFromStorage(this.clientId);
     if (typeof token !== 'undefined') {
       if (this.isAccessTokenInvalid(token)) {
         await this.authenticate();
@@ -89,7 +89,7 @@ export class Oauth2 {
   }
 
   public async logoutUser() {
-    const token = await this.getAccessTokenFromStorage(this.clientId);
+    const token = await this.getClientAccessTokenFromStorage(this.clientId);
     const idToken = await getFromLocalStorage('idToken');
     const config = await this.getConfig();
 
@@ -120,7 +120,7 @@ export class Oauth2 {
 
   public async getUserInfo(): Promise<UserInfo> {
     const config = await this.getConfig();
-    const token = await this.getAccessTokenFromStorage(this.clientId);
+    const token = await this.getClientAccessTokenFromStorage(this.clientId);
     const url = new URL(config.userinfo_endpoint);
     const response = await fetch(url.href, {
       headers: {Authorization: `Bearer ${token!.accessToken}`},
@@ -140,7 +140,7 @@ export class Oauth2 {
    */
   public async introspectToken({
     accessToken,
-  }: AccessToken): Promise<TokenIntrospection> {
+  }: ClientAccessToken | SubjectAccessToken): Promise<TokenIntrospection> {
     const config = await this.getConfig();
     const url = new URL(config.introspection_endpoint);
 
@@ -166,15 +166,14 @@ export class Oauth2 {
    * @param scope - The scope of the token
    * @param cb - A callback which will be used to request a new token if it's not available in storage or via refresh token
    */
-  private async getValidAccessTokenAndSave(
+  private async getValidClientAccessTokenAndSave(
     id: string,
     params: string[][],
-    cb: (uuid: string, params: string[][]) => Promise<AccessToken>,
-  ): Promise<AccessToken> {
-    let token = await this.getAccessTokenFromStorage(id);
+  ): Promise<ClientAccessToken> {
+    let token = await this.getClientAccessTokenFromStorage(id);
     // If no access token then start new access token flow
     if (typeof token === 'undefined') {
-      token = await cb.call(this, id, params);
+      token = await this.getNewClientAccessToken(id, params);
     } else if (await this.isAccessTokenInvalid(token)) {
       // If there is an access token but its not valid or expired
       if (token.refreshToken) {
@@ -182,20 +181,43 @@ export class Oauth2 {
         try {
           token = await this.refreshClientAccessToken(id, token.refreshToken);
         } catch (error) {
-          // If refresh token is rejected
-          if (error.contains('401')) {
-            token = await cb.call(this, id, params);
-          } else {
-            throw error;
-          }
+          token = await this.getNewClientAccessToken(id, params);
         }
       } else {
         // No refresh token so request a new access token
-        token = await cb.call(this, id, params);
+        token = await this.getNewClientAccessToken(id, params);
       }
     }
 
-    return this.saveAccessTokenToStorage(id, token);
+    await saveToLocalStorage(id, JSON.stringify(token));
+
+    return token;
+  }
+
+  /**
+   * Try to get the associated subject access token from storage or request a
+   * new token using the provided callback method.
+   *
+   * @param destination - Unique ID of the application we're getting a token for
+   * @param scope - The scope of the token
+   * @param cb - A callback which will be used to request a new token if it's not available in storage or via refresh token
+   */
+  private async getValidSubjectAccessTokenAndSave(
+    destination: string,
+    params: string[][],
+  ): Promise<SubjectAccessToken> {
+    let token = await this.getSubjectAccessTokenFromStorage(destination);
+    // If no access token then start new access token flow
+    if (typeof token === 'undefined') {
+      token = await this.exchangeToken(destination, params);
+    } else if (await this.isAccessTokenInvalid(token)) {
+      // If there is an access token but its not valid or expired
+      token = await this.exchangeToken(destination, params);
+    }
+
+    await saveToLocalStorage(destination, JSON.stringify(token));
+
+    return token;
   }
 
   private deleteAccessToken() {
@@ -226,19 +248,19 @@ export class Oauth2 {
       },
     });
 
-    if (response.ok) return this.normalizeTokenResponse(response);
+    if (response.ok) return this.normalizeClientTokenResponse(response);
 
     throw Error(response.statusText);
   }
 
   /**
-   *  Request a new access token for the given application, presenting a login
-   *  prompt if required.
+   *  Request a new client access token for the given application, presenting a
+   *  login prompt if required.
    *
    * @param id - The id of the application we're requesting a token for
    * @param scope - The scope of the access token we're requesting
    */
-  private async getNewAccessToken(id: string, params: string[][]) {
+  private async getNewClientAccessToken(id: string, params: string[][]) {
     const {
       secret: codeVerifier,
       hashed: codeChallenge,
@@ -265,7 +287,9 @@ export class Oauth2 {
    *
    * @param param0 - An object of type AccessToken
    */
-  private isAccessTokenInvalid(token: AccessToken): boolean {
+  private isAccessTokenInvalid(
+    token: ClientAccessToken | SubjectAccessToken,
+  ): boolean {
     const {accessTokenDate, expiresIn} = token;
 
     // If token expires in the next minute, consider it invalid
@@ -296,13 +320,13 @@ export class Oauth2 {
   }
 
   /**
-   * Check local storage to see if we have a token saved.
+   * Check local storage to see if we have a client token saved.
    *
    * @param id - The application id associated to the token we want to get
    */
-  private async getAccessTokenFromStorage(
+  private async getClientAccessTokenFromStorage(
     id: string,
-  ): Promise<AccessToken | undefined> {
+  ): Promise<ClientAccessToken | undefined> {
     const data = await getFromLocalStorage(id);
     if (typeof data === 'undefined') {
       return data;
@@ -312,13 +336,19 @@ export class Oauth2 {
   }
 
   /**
-   * Save an access token to local storage
-   * @param id - The application id associated to the token we want to save
-   * @param data - An AccessToken
+   * Check local storage to see if we have a subject token saved.
+   *
+   * @param id - The application id associated to the token we want to get
    */
-  private async saveAccessTokenToStorage(id: string, data: AccessToken) {
-    await saveToLocalStorage(id, JSON.stringify(data));
-    return data;
+  private async getSubjectAccessTokenFromStorage(
+    id: string,
+  ): Promise<SubjectAccessToken | undefined> {
+    const data = await getFromLocalStorage(id);
+    if (typeof data === 'undefined') {
+      return data;
+    }
+
+    return JSON.parse(data);
   }
 
   /**
@@ -328,10 +358,10 @@ export class Oauth2 {
    * @param audienceId - The unique ID of the application you want a new access token from
    */
   private async exchangeToken(
-    applicationId: string,
+    destination: string,
     params: string[][],
-  ): Promise<AccessToken> {
-    const {clientId} = this;
+  ): Promise<SubjectAccessToken> {
+    const {clientId, subjectId} = this;
     const config = await this.getConfig();
     const {accessToken} = await this.authenticate();
     const url = new URL(config.token_endpoint);
@@ -339,9 +369,10 @@ export class Oauth2 {
     url.search = new URLSearchParams([
       ['grant_type', 'urn:ietf:params:oauth:grant-type:token-exchange'],
       ['client_id', clientId],
-      ['audience', applicationId],
+      ['audience', subjectId],
       ['subject_token', accessToken],
       ['subject_token_type', 'urn:ietf:params:oauth:token-type:access_token'],
+      ['destination', destination],
       ...params,
     ]).toString();
 
@@ -352,7 +383,7 @@ export class Oauth2 {
       },
     });
 
-    if (response.ok) return this.normalizeTokenResponse(response);
+    if (response.ok) return this.normalizeTokenExchangeResponse(response);
 
     throw Error(response.statusText);
   }
@@ -363,14 +394,14 @@ export class Oauth2 {
    *
    * @param response - A successful response from the oauth/token endpoint
    */
-  private async normalizeTokenResponse(
+  private async normalizeClientTokenResponse(
     response: Response,
-  ): Promise<AccessToken> {
+  ): Promise<ClientAccessToken> {
     const responseDateHeader = response.headers.get('Date');
     const accessTokenDate = responseDateHeader
       ? new Date(responseDateHeader).valueOf()
       : new Date().valueOf();
-    const body: TokenResponseBody = await response.json();
+    const body: ClientTokenResponseBody = await response.json();
 
     if (body.id_token) {
       saveToLocalStorage('idToken', body.id_token);
@@ -384,6 +415,32 @@ export class Oauth2 {
       tokenType: body.token_type,
       issuedTokenType: body.issued_token_type,
       refreshToken: body.refresh_token,
+      idToken: body.id_token,
+    };
+  }
+
+  /**
+   * Exchanges a client access token for a subject access token
+   * The expires_in time in the response is in seconds, coverted to ms here
+   *
+   * @param response - A successful response from the oauth/token endpoint
+   */
+  private async normalizeTokenExchangeResponse(
+    response: Response,
+  ): Promise<SubjectAccessToken> {
+    const responseDateHeader = response.headers.get('Date');
+    const accessTokenDate = responseDateHeader
+      ? new Date(responseDateHeader).valueOf()
+      : new Date().valueOf();
+    const body: SubjectTokenResponseBody = await response.json();
+
+    return {
+      accessToken: body.access_token,
+      accessTokenDate,
+      expiresIn: body.expires_in * 1000,
+      scope: body.scope,
+      tokenType: body.token_type,
+      issuedTokenType: body.issued_token_type,
     };
   }
 
@@ -419,7 +476,7 @@ export class Oauth2 {
   private async exchangeCodeForToken(
     code: string,
     verifier: string,
-  ): Promise<AccessToken> {
+  ): Promise<ClientAccessToken> {
     const {clientId} = this;
     const config = await this.getConfig();
     const url = new URL(config.token_endpoint);
@@ -434,7 +491,7 @@ export class Oauth2 {
 
     const response = await fetch(url.href, {method: 'POST'});
 
-    if (response.ok) return this.normalizeTokenResponse(response);
+    if (response.ok) return this.normalizeClientTokenResponse(response);
 
     throw Error(response.statusText);
   }

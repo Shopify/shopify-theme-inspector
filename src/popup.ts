@@ -86,12 +86,12 @@ function getUserName(): Promise<String> {
 }
 
 function getAuthStatus(): Promise<boolean> {
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     return chrome.runtime.sendMessage(
       {type: 'request-auth-status'},
       ({isLoggedIn, error}) => {
         if (error) {
-          return reject(error);
+          return resolve(false);
         }
         return resolve(isLoggedIn);
       },

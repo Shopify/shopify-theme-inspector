@@ -1,4 +1,4 @@
-import {AccessToken} from '../../src/types';
+import {ClientAccessToken} from '../../src/types';
 
 export const mockAccessToken = {
   accessToken: '123456789',
@@ -8,4 +8,4 @@ export const mockAccessToken = {
   tokenType: 'Access',
   refreshToken: '123456789',
   issuedTokenType: 'Bearer',
-} as AccessToken;
+} as ClientAccessToken;
