@@ -2,7 +2,11 @@ const IS_CHROME = navigator.userAgent.indexOf('Firefox') < 0;
 
 export function getCurrentTabURL(): Promise<URL> {
   return new Promise((resolve, reject) => {
-    chrome.tabs.query({active: true, lastFocusedWindow: true}, function(tabs) {
+    chrome.tabs.query({active: true, lastFocusedWindow: true}, function (tabs) {
+      if (tabs.length === 0) {
+        reject(new Error('Unable to retrieve URL'));
+      }
+
       const url = tabs[0].url;
 
       if (url) {
