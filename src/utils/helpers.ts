@@ -5,15 +5,15 @@ export function getCurrentTabURL(): Promise<URL> {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, function (tabs) {
       if (tabs.length === 0) {
         reject(new Error('Unable to retrieve URL'));
+      } else {
+        const url = tabs[0].url;
+
+        if (url) {
+          resolve(new URL(url));
+        }
+
+        reject(new Error('Unable to retrieve URL'));
       }
-
-      const url = tabs[0].url;
-
-      if (url) {
-        resolve(new URL(url));
-      }
-
-      reject(new Error('Unable to retrieve URL'));
     });
   });
 }
