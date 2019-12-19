@@ -4,7 +4,7 @@ export function getCurrentTabURL(): Promise<URL> {
   return new Promise((resolve, reject) => {
     chrome.tabs.query({active: true, lastFocusedWindow: true}, function (tabs) {
       if (tabs.length === 0) {
-        reject(new Error('Unable to retrieve URL'));
+        reject(new Error('No Tabs returned'));
       } else {
         const url = tabs[0].url;
 
