@@ -3,6 +3,19 @@ import {mockProfileData} from './mock-data/mock-profile-data';
 import openIdConfiguration from './mock-data/openid-configuration.json';
 import {mockAccessToken} from './mock-data/mock-access-token';
 
+export function mockChromeTabs(page: any) {
+  return page.evaluateOnNewDocument(`
+    window.chrome = window.chrome || {};
+    window.chrome.devtools = window.chrome.devtools || {};
+    window.chrome.devtools.inspectedWindow = window.chrome.devtools.inspectedWindow || {};
+    window.chrome.devtools.panels = window.chrome.devtools.panels || {};
+
+    window.chrome.devtools.inspectedWindow.eval = function(value, cb) {
+      return cb('https://shop1.myshopify.io/?profile_liquid=true')
+    };
+  `);
+}
+
 export function setDevtoolsEval(page: any) {
   return page.evaluateOnNewDocument(`
       window.chrome = window.chrome || {};
