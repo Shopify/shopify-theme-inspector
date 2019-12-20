@@ -3,17 +3,6 @@ import {mockProfileData} from './mock-data/mock-profile-data';
 import openIdConfiguration from './mock-data/openid-configuration.json';
 import {mockAccessToken} from './mock-data/mock-access-token';
 
-export function mockChromeTabs(page: any) {
-  return page.evaluateOnNewDocument(`
-    window.chrome = window.chrome || {};
-    window.chrome.tabs = window.chrome.tabs || {};
-
-    window.chrome.tabs.query = function(options, cb) {
-      cb([{url: 'https://shop1.myshopify.io/?profile_liquid=true'}])
-    }
-  `);
-}
-
 export function setDevtoolsEval(page: any) {
   return page.evaluateOnNewDocument(`
       window.chrome = window.chrome || {};
