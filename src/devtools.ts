@@ -14,6 +14,14 @@ const selectors = {
 };
 
 let liquidFlamegraph: LiquidFlamegraph;
+let url: URL;
+
+// Get the url from the inspectedWindow and save it
+chrome.devtools.inspectedWindow.eval('document.location.href', function(
+  currentUrl: string,
+) {
+  url = new URL(currentUrl);
+});
 
 chrome.devtools.inspectedWindow.eval(
   `typeof window.Shopify === 'object'`,
@@ -44,14 +52,15 @@ async function refreshPanel() {
   try {
     try {
       // Try first to make an unauthorized request if the beta flag is enabled
-      profile = await getProfileData(false);
+      profile = await getProfileData(url, false);
     } catch (error) {
       // If no profiling data exists in first request, try an authorized request
       console.error(error);
-      profile = await getProfileData();
+      profile = await getProfileData(url);
     }
 
     liquidFlamegraph = new LiquidFlamegraph(
+      url,
       document.querySelector(selectors.flamegraphContainer),
       profile,
     );

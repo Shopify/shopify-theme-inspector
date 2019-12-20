@@ -1,5 +1,5 @@
 export {getProfileData} from './getProfileData';
-export {getCurrentTabURL, isDev, getThemeId, getBrowserTheme} from './helpers';
+export {getThemeId, getBrowserTheme} from './helpers';
 export {setTotalTime, formatNodeTime} from './domHelpers';
 export {Oauth2} from './oauth2';
 export {

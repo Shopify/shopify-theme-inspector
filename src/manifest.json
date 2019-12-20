@@ -4,7 +4,6 @@
   "description": "Profile and debug Liquid template on your Shopify store",
   "devtools_page": "devtools.html",
   "permissions": [
-    "activeTab",
     "identity",
     "storage"
   ],

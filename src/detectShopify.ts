@@ -16,6 +16,7 @@ window.addEventListener('message', function(evt) {
   if (typeof evt.data.hasDetectedShopify !== 'undefined') {
     chrome.runtime.sendMessage({
       hasDetectedShopify: evt.data.hasDetectedShopify,
+      url: evt.data.url,
     });
   }
 });
@@ -26,6 +27,7 @@ window.addEventListener('message', function(evt) {
 const detectShopify = `
   window.postMessage({
     hasDetectedShopify: typeof window.Shopify !== 'undefined',
+    url: document.location.href,
   }, '*');
 `;
 

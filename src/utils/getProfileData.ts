@@ -1,13 +1,12 @@
 import nullthrows from 'nullthrows';
 import {SubjectAccessToken} from 'types';
-import {getCurrentTabURL} from '.';
 
 export async function getProfileData(
+  url: URL,
   withAuthorization = true,
 ): Promise<FormattedProfileData> {
   const parser = new DOMParser();
 
-  const url = await getCurrentTabURL();
   const fetchOptions = {} as any;
 
   if (withAuthorization) {

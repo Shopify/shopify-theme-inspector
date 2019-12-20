@@ -1,21 +1,19 @@
 import {env} from './env';
-import {isDev, Oauth2, getCurrentTabURL} from './utils';
+import {Oauth2} from './utils';
 
 const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
+let url: URL;
+let isDev = false;
 
-async function getOauth2Client() {
-  const identityDomain = (await isDev())
-    ? env.DEV_OAUTH2_DOMAIN
-    : env.OAUTH2_DOMAIN;
-  const clientId = (await isDev())
-    ? env.DEV_OAUTH2_CLIENT_ID
-    : env.OAUTH2_CLIENT_ID;
-  const subjectId = (await isDev())
-    ? env.DEV_OAUTH2_SUBJECT_ID
-    : env.OAUTH2_SUBJECT_ID;
+function getOauth2Client() {
+  const identityDomain = isDev ? env.DEV_OAUTH2_DOMAIN : env.OAUTH2_DOMAIN;
+  const clientId = isDev ? env.DEV_OAUTH2_CLIENT_ID : env.OAUTH2_CLIENT_ID;
+  const subjectId = isDev ? env.DEV_OAUTH2_SUBJECT_ID : env.OAUTH2_SUBJECT_ID;
   const clientAuthParams = [['scope', `openid profile ${DEVTOOLS_SCOPE}`]];
 
-  return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
+  return Promise.resolve(
+    new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams}),
+  );
 }
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
@@ -59,7 +57,13 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 // detected
 chrome.runtime.onMessage.addListener((event, sender) => {
   if (sender.tab && sender.tab.id) {
-    setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
+    const hasDetectedShopify = event.hasDetectedShopify;
+    setIconAndPopup(hasDetectedShopify, sender.tab.id);
+
+    if (hasDetectedShopify) {
+      url = new URL(event.url);
+      isDev = url.href.includes('shop1.myshopify');
+    }
   }
 });
 
@@ -93,10 +97,10 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
     return false;
   }
 
-  Promise.all([getCurrentTabURL(), getOauth2Client()])
-    .then(([{origin}, oauth2]) => {
+  getOauth2Client()
+    .then(oauth2 => {
       const params = [['scope', DEVTOOLS_SCOPE]];
-      const destination = `${origin}/admin`;
+      const destination = `${url.origin}/admin`;
       return oauth2.getSubjectAccessToken(destination, params);
     })
     .then(token => {
