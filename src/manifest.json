@@ -5,7 +5,8 @@
   "devtools_page": "devtools.html",
   "permissions": [
     "identity",
-    "storage"
+    "storage",
+    "https://*/*"
   ],
   "background": {
     "scripts": ["background.js"],
