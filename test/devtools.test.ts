@@ -2,7 +2,7 @@ import {
   setupRequestInterception,
   mockChromeSendMessage,
   getExtensionId,
-  mockChromeTabs,
+  mockChromeInspectWindow,
 } from './test-helpers';
 
 describe('Devtools', () => {
@@ -10,7 +10,7 @@ describe('Devtools', () => {
     const extensionId = await getExtensionId();
     await setupRequestInterception(page);
     await mockChromeSendMessage(page);
-    await mockChromeTabs(page);
+    await mockChromeInspectWindow(page);
     await page.goto(`chrome-extension://${extensionId}/devtools.html`);
   });
 

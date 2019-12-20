@@ -3,7 +3,7 @@ import {mockProfileData} from './mock-data/mock-profile-data';
 import openIdConfiguration from './mock-data/openid-configuration.json';
 import {mockAccessToken} from './mock-data/mock-access-token';
 
-export function mockChromeTabs(page: any) {
+export function mockChromeInspectWindow(page: any) {
   return page.evaluateOnNewDocument(`
     window.chrome = window.chrome || {};
     window.chrome.devtools = window.chrome.devtools || {};
