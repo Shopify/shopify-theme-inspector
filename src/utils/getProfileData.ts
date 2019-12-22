@@ -1,17 +1,16 @@
 import nullthrows from 'nullthrows';
 import {SubjectAccessToken} from 'types';
-import {getCurrentTabURL} from '.';
 
 export async function getProfileData(
+  url: URL,
   withAuthorization = true,
 ): Promise<FormattedProfileData> {
   const parser = new DOMParser();
 
-  const url = await getCurrentTabURL();
   const fetchOptions = {} as any;
 
   if (withAuthorization) {
-    const {accessToken} = await requestAccessToken();
+    const {accessToken} = await requestAccessToken(url);
     fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
   }
 
@@ -38,10 +37,10 @@ function noProfileFound(document: HTMLDocument) {
   return document.querySelector('#liquidProfileData') === null;
 }
 
-function requestAccessToken(): Promise<SubjectAccessToken> {
+function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
   return new Promise((resolve, reject) => {
     return chrome.runtime.sendMessage(
-      {type: 'request-core-access-token'},
+      {type: 'request-core-access-token', origin},
       ({token, error}) => {
         if (error) {
           return reject(error);

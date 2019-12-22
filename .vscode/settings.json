@@ -37,5 +37,8 @@
     {"language":  "typescript",  "autoFix":  true  }
   ],
   "javascript.implicitProjectConfig.experimentalDecorators": true,
-  "editor.tabSize": 2
+  "editor.tabSize": 2,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  }
 }

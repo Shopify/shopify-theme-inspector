@@ -32,6 +32,16 @@ chrome.devtools.inspectedWindow.eval(
   },
 );
 
+function getInspectedWindowURL(): Promise<URL> {
+  return new Promise(resolve => {
+    chrome.devtools.inspectedWindow.eval('document.location.href', function(
+      currentUrl: string,
+    ) {
+      resolve(new URL(currentUrl));
+    });
+  });
+}
+
 async function refreshPanel() {
   document.querySelector(selectors.initialMessage)!.innerHTML = '';
   document
@@ -39,21 +49,24 @@ async function refreshPanel() {
     .classList.add('loading-fade');
   document.querySelector(selectors.loadingAnimation)!.classList.remove('hide');
   document.querySelector(selectors.notProfilableMessage)!.classList.add('hide');
+
   let profile: FormattedProfileData;
+  const url = await getInspectedWindowURL();
 
   try {
     try {
       // Try first to make an unauthorized request if the beta flag is enabled
-      profile = await getProfileData(false);
+      profile = await getProfileData(url, false);
     } catch (error) {
       // If no profiling data exists in first request, try an authorized request
       console.error(error);
-      profile = await getProfileData();
+      profile = await getProfileData(url);
     }
 
     liquidFlamegraph = new LiquidFlamegraph(
       document.querySelector(selectors.flamegraphContainer),
       profile,
+      url,
     );
 
     // All events happening here are synchronous. The set timeout is for UI

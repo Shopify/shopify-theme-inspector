@@ -2,7 +2,7 @@ import * as d3 from 'd3';
 import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
 import {debounce} from 'lodash';
-import {formatNodeTime, getThemeId, getCurrentTabURL} from '../utils';
+import {formatNodeTime, getThemeId} from '../utils';
 
 const selectors = {
   partial: '[data-partial]',
@@ -16,13 +16,15 @@ export default class LiquidFlamegraph {
   profile: object;
   flamegraph: any;
   debouncedResize: any;
+  url: URL;
 
-  constructor(element: HTMLDivElement | null, profile: object) {
+  constructor(element: HTMLDivElement | null, profile: object, url: URL) {
     if (!element) {
       throw new TypeError('Element does not exist on page');
     }
     this.element = element;
     this.profile = profile;
+    this.url = url;
     this.flamegraph = this.create(this.curWindowWidth());
     this.debouncedResize = debounce(this.resizeToFitWindow, 300);
 
@@ -87,7 +89,7 @@ export default class LiquidFlamegraph {
     fileName: string,
     lineNumber: number,
   ): Promise<any> {
-    const url = await getCurrentTabURL();
+    const url = this.url;
     const hostname = url.hostname;
     const themeId = await getThemeId();
     const fileDetails = fileName.split(':');
