@@ -30,6 +30,22 @@ function setSignInPopup() {
   if (popupSignedIn) popupSignedIn.classList.add('hide');
 }
 
+// Active Tab is only available after certain methods, like pageAction, are invoked
+// See https://developer.chrome.com/extensions/activeTab#invoking-activeTab for more info
+function getActiveTabURL(): Promise<URL> {
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+      const url = tabs[0].url;
+
+      if (url) {
+        resolve(new URL(url));
+      }
+
+      reject(new Error('Unable to retrieve URL'));
+    });
+  });
+}
+
 async function setupPopupWindow() {
   const isLoggedIn = await getAuthStatus();
 
@@ -41,10 +57,12 @@ async function setupPopupWindow() {
 }
 
 if (signInButton) {
-  signInButton.addEventListener('click', () => {
+  signInButton.addEventListener('click', async () => {
+    const {origin} = await getActiveTabURL();
     chrome.runtime.sendMessage(
       {
         type: 'authenticate',
+        origin,
       },
       payload => {
         if (payload.success) {
@@ -58,8 +76,9 @@ if (signInButton) {
 }
 
 if (signOutButton) {
-  signOutButton.addEventListener('click', () => {
-    chrome.runtime.sendMessage({type: 'signOut'}, payload => {
+  signOutButton.addEventListener('click', async () => {
+    const {origin} = await getActiveTabURL();
+    chrome.runtime.sendMessage({type: 'signOut', origin}, payload => {
       if (payload && payload.error) {
         console.error('Logout error:', payload.error);
       } else {
@@ -71,10 +90,12 @@ if (signOutButton) {
   });
 }
 
-function getUserName(): Promise<String> {
+async function getUserName(): Promise<String> {
+  const {origin} = await getActiveTabURL();
+
   return new Promise((resolve, reject) => {
-    return chrome.runtime.sendMessage(
-      {type: 'request-user-name'},
+    chrome.runtime.sendMessage(
+      {type: 'request-user-name', origin},
       ({name, error}) => {
         if (error) {
           return reject(error);
@@ -85,10 +106,12 @@ function getUserName(): Promise<String> {
   });
 }
 
-function getAuthStatus(): Promise<boolean> {
+async function getAuthStatus(): Promise<boolean> {
+  const {origin} = await getActiveTabURL();
+
   return new Promise(resolve => {
     return chrome.runtime.sendMessage(
-      {type: 'request-auth-status'},
+      {type: 'request-auth-status', origin},
       ({isLoggedIn, error}) => {
         if (error) {
           return resolve(false);

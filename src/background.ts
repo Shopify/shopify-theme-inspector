@@ -1,16 +1,16 @@
 import {env} from './env';
-import {isDev, Oauth2, getCurrentTabURL} from './utils';
+import {isDev, Oauth2} from './utils';
 
 const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
 
-async function getOauth2Client() {
-  const identityDomain = (await isDev())
+function getOauth2Client(origin: string) {
+  const identityDomain = isDev(origin)
     ? env.DEV_OAUTH2_DOMAIN
     : env.OAUTH2_DOMAIN;
-  const clientId = (await isDev())
+  const clientId = isDev(origin)
     ? env.DEV_OAUTH2_CLIENT_ID
     : env.OAUTH2_CLIENT_ID;
-  const subjectId = (await isDev())
+  const subjectId = isDev(origin)
     ? env.DEV_OAUTH2_SUBJECT_ID
     : env.OAUTH2_SUBJECT_ID;
   const clientAuthParams = [['scope', `openid profile ${DEVTOOLS_SCOPE}`]];
@@ -38,19 +38,20 @@ function setIconAndPopup(active: string, tabId: number) {
   chrome.pageAction.show(tabId);
 }
 
-chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type !== 'signOut') return false;
+chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
+  if (type !== 'signOut') return false;
 
-  getOauth2Client()
-    .then(oauth2 => {
-      return oauth2.logoutUser();
-    })
+  const oauth2 = getOauth2Client(origin);
+
+  oauth2
+    .logoutUser()
     .then(() => {
       sendResponse();
     })
     .catch(({message}) => {
       sendResponse({error: message});
     });
+
   return true;
 });
 
@@ -58,22 +59,22 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 // the same context as a tab, sends the results of of whether or not Shopify was
 // detected
 chrome.runtime.onMessage.addListener((event, sender) => {
-  if (sender.tab && sender.tab.id) {
+  if (sender.tab && sender.tab.id && event.type === 'detect-shopify') {
     setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
   }
 });
 
 // Create a listener which handles when the Sign In button is click from the popup
 // or DevTools panel.
-chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type !== 'authenticate') {
+chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
+  if (type !== 'authenticate') {
     return false;
   }
 
-  getOauth2Client()
-    .then(oauth2 => {
-      return oauth2.authenticate();
-    })
+  const oauth2 = getOauth2Client(origin);
+
+  oauth2
+    .authenticate()
     .then(() => {
       sendResponse({success: true});
     })
@@ -88,17 +89,17 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 // Listen for 'request-core-access-token' event and respond to the messenger
 // with a valid Shopify Core access token. This may trigger a login popup window
 // if needed.
-chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type !== 'request-core-access-token') {
+chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
+  if (type !== 'request-core-access-token') {
     return false;
   }
 
-  Promise.all([getCurrentTabURL(), getOauth2Client()])
-    .then(([{origin}, oauth2]) => {
-      const params = [['scope', DEVTOOLS_SCOPE]];
-      const destination = `${origin}/admin`;
-      return oauth2.getSubjectAccessToken(destination, params);
-    })
+  const oauth2 = getOauth2Client(origin);
+  const params = [['scope', DEVTOOLS_SCOPE]];
+  const destination = `${origin}/admin`;
+
+  oauth2
+    .getSubjectAccessToken(destination, params)
     .then(token => {
       sendResponse({token});
     })
@@ -111,13 +112,13 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 
 // Listen for the 'request-user-info' event and respond to the messenger
 // with a the given_name of the currently logged in user.
-chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type !== 'request-user-name') return false;
+chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
+  if (type !== 'request-user-name') return false;
 
-  getOauth2Client()
-    .then(oauth2 => {
-      return oauth2.getUserInfo();
-    })
+  const oauth2 = getOauth2Client(origin);
+
+  oauth2
+    .getUserInfo()
     .then(userInfo => {
       const name = userInfo.given_name;
       sendResponse({name});
@@ -131,14 +132,13 @@ chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
 
 // Listen for the 'request-auth-status' event and respond to the messenger
 // with a boolean of user login status.
-chrome.runtime.onMessage.addListener((event, _, sendResponse) => {
-  if (event.type !== 'request-auth-status') return false;
+chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
+  if (type !== 'request-auth-status') return false;
 
-  getOauth2Client()
-    .then(oauth2 => {
-      return oauth2.hasValidClientToken();
-    })
+  const oauth2 = getOauth2Client(origin);
 
+  oauth2
+    .hasValidClientToken()
     .then(isLoggedIn => {
       sendResponse({isLoggedIn});
     })
