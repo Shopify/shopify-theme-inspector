@@ -19,6 +19,10 @@ A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so
 ### Can I profile any Shopify store I want?
 No, you can only profile stores that are linked to your [single login Shopify account](https://help.shopify.com/en/manual/your-account/logging-in/sso-migration-guide). If you can't log into the store admin with your Shopify account, you won't be able to request profiling data.
 
+Shopify partner collaborator accounts will not be able to profile a store even with
+full access permission. Shopify will work on this issue, however, there is no timeline
+on when it will be done.
+
 ### I'm not seeing the Shopify tab in Chrome DevTools
 The Shopify tab will only show when viewing a Shopify Online Store.
 
