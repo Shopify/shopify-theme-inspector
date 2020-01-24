@@ -24,8 +24,8 @@ export function setDevtoolsEval(page: any) {
       window.chrome.devtools.inspectedWindow.eval = function(value, cb){
         if (value === "typeof window.Shopify === 'object'") {
           return cb(true)
-        } else if (value === "document.location.href") {
-          return cb('https://shop1.myshopify.io')
+        }  else if (value === "Shopify.shop") {
+          return cb('shop1.myshopify.io')
         }
       };
       window.chrome.devtools.panels.create = () => {};
