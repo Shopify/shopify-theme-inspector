@@ -1,9 +1,5 @@
 export function setTotalTime(totalTime: number) {
-  document.querySelector(
-    '[data-total-time]',
-  )!.innerHTML = `Total time to render liquid: <b>${Math.trunc(
-    totalTime * 1000,
-  )}ms</b>`;
+  updateInfoText('[data-total-time]', `${Math.trunc(totalTime * 1000)}ms`);
 }
 
 export function formatNodeTime(nodeTime: number) {
@@ -13,4 +9,16 @@ export function formatNodeTime(nodeTime: number) {
   } else {
     return '< 1';
   }
+}
+
+export function emptyHTMLNode(node: any) {
+  if (!node) return;
+
+  while (node.firstChild) {
+    node.removeChild(node.firstChild);
+  }
+}
+
+export function updateInfoText(selector: string, updateText: string) {
+  document.querySelector(`${selector} b`)!.textContent = updateText;
 }

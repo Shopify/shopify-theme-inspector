@@ -2,7 +2,12 @@ import * as d3 from 'd3';
 import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
 import {debounce} from 'lodash';
-import {formatNodeTime, getThemeId} from '../utils';
+import {
+  formatNodeTime,
+  getThemeId,
+  emptyHTMLNode,
+  updateInfoText,
+} from '../utils';
 
 const selectors = {
   partial: '[data-partial]',
@@ -33,7 +38,7 @@ export default class LiquidFlamegraph {
   }
 
   display(): void {
-    this.element.innerHTML = '';
+    emptyHTMLNode(this.element);
     d3.select(this.element)
       .datum(this.profile)
       .call(this.flamegraph);
@@ -63,26 +68,19 @@ export default class LiquidFlamegraph {
   }
 
   async displayNodeDetails(node: FlamegraphNode) {
-    document.querySelector(
-      selectors.partial,
-    )!.innerHTML = `File: ${node.data.name}`;
-
-    document.querySelector(
-      selectors.nodeTime,
-    )!.innerHTML = `Total Time: <b>${formatNodeTime(node.value)}ms</b>`;
+    updateInfoText(selectors.partial, node.data.name);
+    updateInfoText(selectors.nodeTime, `${formatNodeTime(node.value)}ms`);
 
     const clickableLink = await this.generateClickableLink(
       node.data.name,
       node.data.line,
     );
 
-    document.querySelector(
-      selectors.code,
-    )!.innerHTML = `Code snippet: <a href="${clickableLink}" target="_blank"><i><span class="code-snippet">${node.data.code}</span></i></a>`;
+    const codeLink = document.querySelector(selectors.code);
+    codeLink!.querySelector('a')!.href = clickableLink;
+    codeLink!.querySelector('.code-snippet')!.textContent = node.data.code;
 
-    document.querySelector(
-      selectors.line,
-    )!.innerHTML = `Line: ${node.data.line}`;
+    updateInfoText(selectors.line, `${node.data.line}`);
   }
 
   async generateClickableLink(
