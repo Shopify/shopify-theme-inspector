@@ -34,10 +34,10 @@ chrome.devtools.inspectedWindow.eval(
 
 function getInspectedWindowURL(): Promise<URL> {
   return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval('document.location.href', function(
+    chrome.devtools.inspectedWindow.eval('Shopify.shop', function(
       currentUrl: string,
     ) {
-      resolve(new URL(currentUrl));
+      resolve(new URL(`https://${currentUrl}`));
     });
   });
 }
