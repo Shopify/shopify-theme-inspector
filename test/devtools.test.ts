@@ -15,7 +15,7 @@ describe('Devtools', () => {
   });
 
   it('test initial message for devtools window is displayed', async () => {
-    const elementText = await page.$eval('.initial', elem => elem.innerHTML);
+    const elementText = await page.$eval('.initial', elem => elem.textContent);
     expect(elementText).toStrictEqual('No profiling recorded yet');
   });
 
@@ -24,7 +24,7 @@ describe('Devtools', () => {
     await page.$eval('[data-refresh-button]', elem => elem.click());
     const flamegraphElement = await page.$eval(
       '.d3-flame-graph',
-      elem => elem.innerHTML,
+      elem => elem.textContent,
     );
     expect(flamegraphElement).not.toBeNull();
   });
@@ -50,7 +50,7 @@ describe('Devtools', () => {
     await page.$eval('.d3-flame-graph-label', elem => elem.click());
     const elementHtml = await page.$eval(
       '[data-detailed-info]',
-      elem => elem.innerHTML,
+      elem => elem.textContent,
     );
     expect(elementHtml).not.toBeNull();
   });

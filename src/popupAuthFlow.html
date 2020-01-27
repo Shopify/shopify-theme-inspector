@@ -7,15 +7,21 @@
       <img class="shopify-logo" src="./images/shopify_logo_black.png" alt="Shopify Logo">
       <hr class="faded-hr">
       <p class="login-prompt">Sign in to your Shopify account</p>
-      <button class="popup-button" id="signInButton" data-sign-in>Sign In</button>
+      <button class="popup-button" id="signInButton" data-sign-in>
+        <span>Sign In</span>
+        <div data-loading-animation class="loader hide" style="display: inline-block"></div>
+      </button>
     </div>
 
     <div class="popup hide" data-popup-signed-in>
       <img class="shopify-logo" src="./images/shopify_logo_black.png" alt="Shopify Logo">
       <hr class="faded-hr">
-      <p class="login-prompt" data-signed-in-prompt>&nbsp;</p>
+      <p class="login-prompt" data-signed-in-prompt>You are logged in as <b>-</b></p>
       <p class="login-prompt"><a href="https://developers.google.com/web/tools/chrome-devtools/open" target="_blank">Open Chrome DevTools</a> and select the <b>Shopify</b> tab</p>
-      <button class="popup-button" id="signOutButton" data-sign-out>Sign Out</button>
+      <button class="popup-button" id="signOutButton" data-sign-out>
+        <span>Sign Out</span>
+        <div data-loading-animation class="loader hide" style="display: inline-block"></div>
+      </button>
     </div>
   </body>
 </html>

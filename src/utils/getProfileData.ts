@@ -27,7 +27,7 @@ export async function getProfileData(
   }
 
   const profileData = JSON.parse(
-    nullthrows(document.querySelector('#liquidProfileData')).innerHTML,
+    nullthrows(document.querySelector('#liquidProfileData')).textContent || '',
   );
 
   return cleanProfileData(profileData);

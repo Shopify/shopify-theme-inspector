@@ -14,15 +14,14 @@ const signOutButton = document.querySelector(`[data-sign-out]`);
 
 async function setSignedInPopup() {
   const popupSignedInPrompt = document.querySelector(
-    selectors.popupSignedInPrompt,
+    `${selectors.popupSignedInPrompt} b`,
   );
 
   if (popupSignedIn) popupSignedIn.classList.remove('hide');
   if (popupSignIn) popupSignIn.classList.add('hide');
 
   const name = await getUserName();
-  if (popupSignedInPrompt)
-    popupSignedInPrompt.innerHTML = `You are logged in as <b>${name}</b>`;
+  popupSignedInPrompt!.textContent = `${name}`;
 }
 
 function setSignInPopup() {
@@ -70,8 +69,8 @@ if (signInButton) {
         }
       },
     );
-    signInButton.innerHTML =
-      '<div data-loading-animation class="loader" style="display: inline-block"></div>';
+    signInButton.querySelector('span')?.classList.add('hide');
+    signInButton.querySelector('.loader')?.classList.remove('hide');
   });
 }
 
@@ -85,8 +84,8 @@ if (signOutButton) {
         setSignInPopup();
       }
     });
-    signOutButton.innerHTML =
-      '<div data-loading-animation class="loader" style="display: inline-block"></div>';
+    signOutButton.querySelector('span')?.classList.add('hide');
+    signOutButton.querySelector('.loader')?.classList.remove('hide');
   });
 }
 

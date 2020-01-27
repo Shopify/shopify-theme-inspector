@@ -1,6 +1,11 @@
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
-import {getProfileData, setTotalTime, getBrowserTheme} from './utils';
+import {
+  getProfileData,
+  setTotalTime,
+  getBrowserTheme,
+  emptyHTMLNode,
+} from './utils';
 
 import './styles/devtools.css';
 
@@ -43,7 +48,7 @@ function getInspectedWindowURL(): Promise<URL> {
 }
 
 async function refreshPanel() {
-  document.querySelector(selectors.initialMessage)!.innerHTML = '';
+  emptyHTMLNode(document.querySelector(selectors.initialMessage));
   document
     .querySelector(selectors.flamegraphWrapper)!
     .classList.add('loading-fade');
