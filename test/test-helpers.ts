@@ -24,7 +24,7 @@ export function setDevtoolsEval(page: any) {
       window.chrome.devtools.inspectedWindow.eval = function(value, cb){
         if (value === "typeof window.Shopify === 'object'") {
           return cb(true)
-        }  else if (value === "Shopify.shop") {
+        }  else if (value === " + document.location.pathname") {
           return cb('shop1.myshopify.io')
         }
       };

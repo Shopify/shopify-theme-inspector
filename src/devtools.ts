@@ -39,11 +39,12 @@ chrome.devtools.inspectedWindow.eval(
 
 function getInspectedWindowURL(): Promise<URL> {
   return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval('Shopify.shop', function(
-      currentUrl: string,
-    ) {
-      resolve(new URL(`https://${currentUrl}`));
-    });
+    chrome.devtools.inspectedWindow.eval(
+      'Shopify.shop + document.location.pathname',
+      function(currentUrl: string) {
+        resolve(new URL(`https://${currentUrl}`));
+      },
+    );
   });
 }
 
