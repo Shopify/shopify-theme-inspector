@@ -1,5 +1,9 @@
 # Change Log
 
+## v1.0.2 (Jan 27, 2019)
+
+* [#39](https://github.com/Shopify/shopify-theme-inspector/pull/39) Fix profiling path
+
 ## v1.0.1 (Jan 27, 2019)
 
 * [#37](https://github.com/Shopify/shopify-theme-inspector/pull/37) Fix custom domain redirect
