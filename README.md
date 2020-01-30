@@ -43,7 +43,7 @@ If you find a bug please [open an issue](https://github.com/Shopify/shopify-devt
 If you would like to request a feature, check out the [feature request documentation](https://github.com/Shopify/shopify-devtools/blob/master/FEATURE_REQUEST.md).
 
 ## Shopify Employees
-View the [internal documentation](https://docs.google.com/document/d/1VIO8XA6Jmk5IvgQwE8RQ263o2fBelSMhFCIkbMhgU14/edit) for more details on internal usage, development, and publishing new releases.
+View the [internal documentation](https://github.com/Shopify/storefront-foundations/blob/master/README.md#shopify-theme-inspector-for-chrome) for more details on internal usage, development, and publishing new releases.
 
 
 
