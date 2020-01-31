@@ -49,6 +49,7 @@ export default class LiquidFlamegraph {
       .flamegraph()
       .inverted(true)
       .cellHeight(20)
+      .minFrameSize(5)
       .width(flameGraphWidth)
       .label(function(node: FlamegraphNode) {
         return `${node.data.name} took ${formatNodeTime(node.value)}ms`;
