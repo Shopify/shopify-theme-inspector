@@ -20,7 +20,7 @@ Shopify themes are fast out of the box, but Liquid changes made afterwards can c
 
 **Note:** Shopify partner collaborator accounts will not be able to profile a store even with
 full access permission. Shopify will work on this issue, however, there is no timeline
-on when it will be done. **A workaround is to liquid profile on development stores.**
+on when it will be done.
 
 ## Share your Performance Wins!
 We would love to learn how you use this tool and solve your Liquid rendering issues. Please share by [making a comment here](https://github.com/Shopify/shopify-theme-inspector/issues/41) and/or tweet us about your win [@shopifydevs](https://twitter.com/shopifydevs).
