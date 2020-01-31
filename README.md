@@ -1,6 +1,9 @@
 # Shopify Theme Inspector for Chrome
 
-A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so you can triage long-running code and reduce server response times.
+Profile and debug Liquid template on your Shopify store.
+
+Shopify themes are fast out of the box, but Liquid changes made afterwards can cause slowdowns. Shopify Theme Inspector for Chrome helps identify Liquid changes that are slowing your site down by providing a visualization of Liquid render profiling data, and giving you the means to triage the slowest parts of your Shopify theme.
+
 
 ![Elements](https://user-images.githubusercontent.com/4837696/70237825-018e5780-1736-11ea-9fda-3691e73abf28.png)
 
@@ -14,6 +17,68 @@ A Chrome DevTools plugin that visualizes Shopify Liquid render profiling data so
 2. [Open Chrome DevTools](https://developers.google.com/web/tools/chrome-devtools/open).
 3. Navigate to the Shopify tab, located in the top group of tabs in Chrome DevTools.
 4. Click the **↻** (Load Profile) button to request and view your Liquid profile [flamegraph](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description).
+
+**Note:** Shopify partner collaborator accounts will not be able to profile a store even with
+full access permission. Shopify will work on this issue, however, there is no timeline
+on when it will be done. **A workaround is to liquid profile on development stores.**
+
+## Share your Performance Wins!
+We would love to learn how you use this tool and solve your Liquid rendering issues. Please share by [making a comment here](https://github.com/Shopify/shopify-theme-inspector/issues/41) and/or tweet us about your win [@shopifydevs](https://twitter.com/shopifydevs).
+
+## Understanding the Liquid profile flame graph
+
+Starting from the top of the stack, `Page` contains the total time the server spent to render the entire page.
+
+<p style="text-align: center;">
+  <img width="700" src="https://user-images.githubusercontent.com/2319002/73567139-9782ed80-441a-11ea-8379-9393e2a1ff13.png" />
+</p>
+
+The total time `Page` spent on rendering does not equal to time to first byte (TTFB). There will be some overhead due to the network.
+
+<p style="text-align: center; font-weight: bold;">Page total render time + network overhead = time to first byte</p>
+
+`template:index` is an example of top level liquid code that `Page` needs to resolve and render. You can learn more details about this section by clicking on the bar.
+
+<p style="text-align: center;">
+  <img width="400" src="https://user-images.githubusercontent.com/2319002/73567318-06f8dd00-441b-11ea-9ea5-13249baa989f.png" />
+</p>
+
+* File - where this code is located in your themes files
+* Total Time - the time it took for server to render this code
+* Code snippet - the exact code that server resolved (The link will take you to Online Store Code Editor)
+* Line - the line number where the code exists
+
+## What to look for when debugging?
+### Too many sections
+
+<p style="text-align: center;">
+  <img width="700" src="https://user-images.githubusercontent.com/2319002/73567445-49221e80-441b-11ea-9297-186d2f275d48.png" />
+</p>
+
+For each section, the server will take time to resolve and render. When there are too many sections, the server will take more time to resolve.
+
+### Too deep
+
+<p style="text-align: center;">
+  <img width="700" src="https://user-images.githubusercontent.com/2319002/73568079-863ae080-441c-11ea-97c6-db3b3d206a5e.png" />
+</p>
+
+Here are some possible reasons why a flame graph would result in this situation:
+
+* Too many conditionals
+* Nested loops
+* Nested includes
+* Combination of all of the above
+
+### Non-Visual Sections
+
+These sections could be for:
+* Scripts
+* SEO
+* Analytics
+* … etc.
+
+Evaluate whether these sections are necessary or refactor it so that it becomes more efficient.
 
 ## FAQ
 ### Can I profile any Shopify store I want?
@@ -44,6 +109,3 @@ If you would like to request a feature, check out the [feature request documenta
 
 ## Shopify Employees
 View the [internal documentation](https://github.com/Shopify/storefront-foundations/blob/master/README.md#shopify-theme-inspector-for-chrome) for more details on internal usage, development, and publishing new releases.
-
-
-
