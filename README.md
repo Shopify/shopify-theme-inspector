@@ -29,17 +29,17 @@ We would love to learn how you use this tool and solve your Liquid rendering iss
 
 Starting from the top of the stack, `Page` contains the total time the server spent to render the entire page.
 
-<p style="text-align: center;">
+<p align="center">
   <img width="700" src="https://user-images.githubusercontent.com/2319002/73567139-9782ed80-441a-11ea-8379-9393e2a1ff13.png" />
 </p>
 
 The total time `Page` spent on rendering does not equal to time to first byte (TTFB). There will be some overhead due to the network.
 
-<p style="text-align: center; font-weight: bold;">Page total render time + network overhead = time to first byte</p>
+<p align="center"><b>Page total render time + network overhead = time to first byte</b></p>
 
 `template:index` is an example of top level liquid code that `Page` needs to resolve and render. You can learn more details about this section by clicking on the bar.
 
-<p style="text-align: center;">
+<p align="center">
   <img width="400" src="https://user-images.githubusercontent.com/2319002/73567318-06f8dd00-441b-11ea-9ea5-13249baa989f.png" />
 </p>
 
@@ -51,7 +51,7 @@ The total time `Page` spent on rendering does not equal to time to first byte (T
 ## What to look for when debugging?
 ### Too many sections
 
-<p style="text-align: center;">
+<p align="center">
   <img width="700" src="https://user-images.githubusercontent.com/2319002/73567445-49221e80-441b-11ea-9297-186d2f275d48.png" />
 </p>
 
@@ -59,7 +59,7 @@ For each section, the server will take time to resolve and render. When there ar
 
 ### Too deep
 
-<p style="text-align: center;">
+<p align="center">
   <img width="700" src="https://user-images.githubusercontent.com/2319002/73568079-863ae080-441c-11ea-97c6-db3b3d206a5e.png" />
 </p>
 
