@@ -1,7 +1,7 @@
 import * as d3 from 'd3';
 import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
-import {debounce} from 'lodash';
+import {debounce, escape} from 'lodash';
 import {
   formatNodeTime,
   getThemeId,
@@ -52,7 +52,7 @@ export default class LiquidFlamegraph {
       .minFrameSize(1)
       .width(flameGraphWidth)
       .label(function(node: FlamegraphNode) {
-        return `${node.data.name} took ${formatNodeTime(node.value)}ms`;
+        return escape(`${node.data.name} took ${formatNodeTime(node.value)}ms`);
       })
       .onClick((node: FlamegraphNode) => {
         this.displayNodeDetails(node);
