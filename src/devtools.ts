@@ -1,3 +1,4 @@
+import {escape} from 'lodash';
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
 import {
@@ -16,6 +17,9 @@ const selectors = {
   initialMessage: '[data-initial-message]',
   notProfilableMessage: '[data-page-not-profilable]',
   flamegraphWrapper: '[data-flamegraph-wrapper]',
+  searchButton: '[data-search-button]',
+  clearButton: '[data-clear-button]',
+  searchParam: '[data-search-param]',
 };
 
 let liquidFlamegraph: LiquidFlamegraph;
@@ -25,17 +29,55 @@ chrome.devtools.inspectedWindow.eval(
   function(isShopifyStore: boolean) {
     if (isShopifyStore) {
       chrome.devtools.panels.create('Shopify', '', './devtools.html');
-      const toolbar = new Toolbar();
 
       if (getBrowserTheme() === 'dark') {
         document.documentElement.setAttribute('data-theme', 'dark');
       }
 
-      toolbar.refreshButton.addEventListener('click', refreshPanel);
-      toolbar.zoomOutButton.addEventListener('click', zoomOutFlamegraph);
+      addEventListenerToButtons();
     }
   },
 );
+
+function addEventListenerToButtons() {
+  const toolbar = new Toolbar();
+
+  toolbar.refreshButton.addEventListener('click', refreshPanel);
+  toolbar.zoomOutButton.addEventListener('click', zoomOutFlamegraph);
+
+  document
+    .querySelector(selectors.searchButton)!
+    .addEventListener('click', function(event) {
+      event.preventDefault();
+      search();
+    });
+
+  document
+    .querySelector(selectors.clearButton)!
+    .addEventListener('click', function(event) {
+      event.preventDefault();
+      clear();
+    });
+}
+
+function search() {
+  const searchParam = (document.querySelector(
+    selectors.searchParam,
+  ) as HTMLInputElement).value;
+
+  if (typeof liquidFlamegraph.flamegraph !== 'undefined') {
+    liquidFlamegraph.flamegraph.search(escape(searchParam));
+  }
+}
+
+function clear() {
+  (document.querySelector(selectors.searchParam) as HTMLInputElement).value =
+    '';
+
+  if (typeof liquidFlamegraph.flamegraph !== 'undefined') {
+    liquidFlamegraph.flamegraph.clear();
+  }
+}
 
 function getInspectedWindowURL(): Promise<URL> {
   return new Promise(resolve => {

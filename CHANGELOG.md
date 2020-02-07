@@ -1,5 +1,9 @@
 # Change Log
 
+## v1.0.4 (Feb 11, 2020)
+
+* [#46](https://github.com/Shopify/shopify-theme-inspector/pull/46) Allow searching keyword in the flamegraph
+
 ## v1.0.3 (Feb 1, 2020)
 
 * [#40](https://github.com/Shopify/shopify-theme-inspector/pull/40) Set minFrameSize to 5
