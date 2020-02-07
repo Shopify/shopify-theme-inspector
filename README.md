@@ -101,11 +101,11 @@ If you see this error, it may be because of one of the following conditions:
 If it was none of the errors above you can right click on Shopify DevTools , inspect page, and view console for error details.
 
 ## Contributing
-To learn more about how to contribute to this project check out the [contributing](https://github.com/Shopify/shopify-devtools/blob/master/CONTRIBUTING.md) documentation.
+To learn more about how to contribute to this project check out the [contributing](https://github.com/Shopify/shopify-theme-inspector/blob/master/CONTRIBUTING.md) documentation.
 
-If you find a bug please [open an issue](https://github.com/Shopify/shopify-devtools/issues/new).
+If you find a bug please [open an issue](https://github.com/Shopify/shopify-theme-inspector/issues/new).
 
-If you would like to request a feature, check out the [feature request documentation](https://github.com/Shopify/shopify-devtools/blob/master/FEATURE_REQUEST.md).
+If you would like to request a feature, check out the [feature request documentation](https://github.com/Shopify/shopify-theme-inspector/blob/master/FEATURE_REQUEST.md).
 
 ## Shopify Employees
-View the [internal documentation](https://github.com/Shopify/storefront-foundations/blob/master/README.md#shopify-theme-inspector-for-chrome) for more details on internal usage, development, and publishing new releases.
+View the [internal documentation](https://github.com/Shopify/storefront-foundations/blob/master/shopify-theme-inspector/README.md#profiling-productions-shops) for more details on internal usage, development, and publishing new releases.
