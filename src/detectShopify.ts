@@ -1,33 +1,16 @@
-import nullthrows from 'nullthrows';
-
-function injectCode(code: string) {
-  const script = document.createElement('script');
-  script.textContent = code;
-
-  nullthrows(document.documentElement).appendChild(script);
-}
-
-// Listen for the message posted by the window from the code we are injecting
-// below into the current page
-window.addEventListener('message', function(evt) {
-  if (evt.source !== window || !evt.data) {
-    return;
-  }
-  if (typeof evt.data.hasDetectedShopify !== 'undefined') {
-    chrome.runtime.sendMessage({
-      type: 'detect-shopify',
-      hasDetectedShopify: evt.data.hasDetectedShopify,
-    });
-  }
+// Use regex on document to test for a shopify site
+// Look for a DOM script element that contains
+//    "Shopify.shop ="
+// This is auto-generated from content_for_header
+const findShopifyScript = Array.from(
+  document.querySelectorAll('script'),
+).filter(script => {
+  return /Shopify\.shop =/.test(script.textContent || '');
 });
 
-// We need to inject this detect code into the current page because even though
-// this Content Script has access to the same DOM as the current page, it does
-// not share the same JS global scope.
-const detectShopify = `
-  window.postMessage({
-    hasDetectedShopify: typeof window.Shopify !== 'undefined',
-  }, '*');
-`;
-
-injectCode(detectShopify);
+if (findShopifyScript.length) {
+  chrome.runtime.sendMessage({
+    type: 'detect-shopify',
+    hasDetectedShopify: true,
+  });
+}

@@ -3,6 +3,7 @@
 ## v1.0.4 (Feb 11, 2020)
 
 * [#46](https://github.com/Shopify/shopify-theme-inspector/pull/46) Allow searching keyword in the flamegraph
+* [#47](https://github.com/Shopify/shopify-theme-inspector/pull/47) Detect Shopify stores without script inject
 
 ## v1.0.3 (Feb 1, 2020)
 
