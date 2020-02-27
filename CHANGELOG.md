@@ -1,5 +1,8 @@
 # Change Log
 
+## v1.0.5
+* [#49](https://github.com/Shopify/shopify-theme-inspector/pull/49) Local development url detect
+
 ## v1.0.4 (Feb 11, 2020)
 
 * [#46](https://github.com/Shopify/shopify-theme-inspector/pull/46) Allow searching keyword in the flamegraph
