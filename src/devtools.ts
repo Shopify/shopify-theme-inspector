@@ -82,7 +82,7 @@ function clear() {
 function getInspectedWindowURL(): Promise<URL> {
   return new Promise(resolve => {
     chrome.devtools.inspectedWindow.eval(
-      `(/myshopify\\.io/.test(document.location.host) ? document.location.host : Shopify.shop) + document.location.pathname`,
+      `(/myshopify\\.io/.test(document.location.host) ? document.location.host : Shopify.shop) + document.location.pathname + document.location.search`,
       function(currentUrl: string) {
         resolve(new URL(`https://${currentUrl}`));
       },

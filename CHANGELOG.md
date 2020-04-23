@@ -2,6 +2,7 @@
 
 ## v1.0.5
 * [#49](https://github.com/Shopify/shopify-theme-inspector/pull/49) Local development url detect
+* [#52](https://github.com/Shopify/shopify-theme-inspector/pull/52) Allow search path profiling
 
 ## v1.0.4 (Feb 11, 2020)
 
