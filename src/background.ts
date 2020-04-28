@@ -17,7 +17,7 @@ function getOauth2Client(origin: string) {
     [
       'scope',
       `openid profile ${DEVTOOLS_SCOPE} https://api.shopify.com/auth/partners.collaborator-relationships.readonly`,
-    ]
+    ],
   ];
 
   return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
