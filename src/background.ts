@@ -13,7 +13,13 @@ function getOauth2Client(origin: string) {
   const subjectId = isDev(origin)
     ? env.DEV_OAUTH2_SUBJECT_ID
     : env.OAUTH2_SUBJECT_ID;
-  const clientAuthParams = [['scope', `openid profile ${DEVTOOLS_SCOPE}`, 'https://api.shopify.com/auth/partners.collaborator-relationships.readonly']];
+  const clientAuthParams = [
+    [
+      'scope',
+      `openid profile ${DEVTOOLS_SCOPE}`,
+      'https://api.shopify.com/auth/partners.collaborator-relationships.readonly',
+    ],
+  ];
 
   return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
 }
