@@ -2,6 +2,8 @@ import {env} from './env';
 import {isDev, Oauth2} from './utils';
 
 const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
+const COLLABORATORS_SCOPE =
+  'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
 
 function getOauth2Client(origin: string) {
   const identityDomain = isDev(origin)
@@ -13,7 +15,9 @@ function getOauth2Client(origin: string) {
   const subjectId = isDev(origin)
     ? env.DEV_OAUTH2_SUBJECT_ID
     : env.OAUTH2_SUBJECT_ID;
-  const clientAuthParams = [['scope', `openid profile ${DEVTOOLS_SCOPE}`]];
+  const clientAuthParams = [
+    ['scope', `openid profile ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`],
+  ];
 
   return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
 }
@@ -95,7 +99,7 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   }
 
   const oauth2 = getOauth2Client(origin);
-  const params = [['scope', DEVTOOLS_SCOPE]];
+  const params = [['scope', `${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`]];
   const destination = `${origin}/admin`;
 
   oauth2
