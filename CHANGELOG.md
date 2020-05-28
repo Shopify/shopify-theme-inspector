@@ -1,9 +1,9 @@
 # Change Log
 
-## v1.0.6
+## v1.0.6 (May 27, 2020)
 * [#53](https://github.com/Shopify/shopify-theme-inspector/pull/53) Add collaborator scope
 
-## v1.0.5
+## v1.0.5 (May 27, 2020)
 * [#49](https://github.com/Shopify/shopify-theme-inspector/pull/49) Local development url detect
 * [#52](https://github.com/Shopify/shopify-theme-inspector/pull/52) Allow search path profiling
 
