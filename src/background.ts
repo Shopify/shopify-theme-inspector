@@ -16,7 +16,12 @@ function getOauth2Client(origin: string) {
     ? env.DEV_OAUTH2_SUBJECT_ID
     : env.OAUTH2_SUBJECT_ID;
   const clientAuthParams = [
-    ['scope', `openid profile ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`],
+    [
+      'scope',
+      `openid profile ${
+        (window as any).shopifyEmployee === true ? 'employee' : ''
+      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+    ],
   ];
 
   return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
@@ -99,7 +104,14 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   }
 
   const oauth2 = getOauth2Client(origin);
-  const params = [['scope', `${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`]];
+  const params = [
+    [
+      'scope',
+      `${
+        (window as any).shopifyEmployee === true ? 'employee' : ''
+      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+    ],
+  ];
   const destination = `${origin}/admin`;
 
   oauth2
