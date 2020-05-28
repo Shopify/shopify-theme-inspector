@@ -18,9 +18,7 @@ Shopify themes are fast out of the box, but Liquid changes made afterwards can c
 3. Navigate to the Shopify tab, located in the top group of tabs in Chrome DevTools.
 4. Click the **↻** (Load Profile) button to request and view your Liquid profile [flamegraph](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description).
 
-**Note:** Shopify partner collaborator accounts will not be able to profile a store even with
-full access permission. Shopify will work on this issue, however, there is no timeline
-on when it will be done.
+**Note:** Development stores cannot generate a liquid profiled. Shopify is working on this issue.
 
 ## Share your Performance Wins!
 We would love to learn how you use this tool and solve your Liquid rendering issues. Please share by [making a comment here](https://github.com/Shopify/shopify-theme-inspector/issues/41) and/or tweet us about your win [@shopifydevs](https://twitter.com/shopifydevs).
@@ -82,11 +80,11 @@ Evaluate whether these sections are necessary or refactor it so that it becomes 
 
 ## FAQ
 ### Can I profile any Shopify store I want?
-No, you can only profile stores that are linked to your [single login Shopify account](https://help.shopify.com/en/manual/your-account/logging-in/sso-migration-guide). If you can't log into the store admin with your Shopify account, you won't be able to request profiling data.
+No, you can only profile stores that are linked to your [single login Shopify account](https://help.shopify.com/en/manual/your-account/logging-in/sso-migration-guide).
+You can also profile stores that you have access as a Shopify partner collaborator that have themes access.
 
-Shopify partner collaborator accounts will not be able to profile a store even with
-full access permission. Shopify will work on this issue, however, there is no timeline
-on when it will be done.
+Shopify partner collaborator accounts will not be able to profile a development store.
+Shopify is working on this issue, however, there is no timeline on when it will be done.
 
 ### I'm not seeing the Shopify tab in Chrome DevTools
 The Shopify tab will only show when viewing a Shopify Online Store.
