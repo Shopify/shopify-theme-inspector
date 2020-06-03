@@ -14,3 +14,10 @@ if (findShopifyScript.length) {
     hasDetectedShopify: true,
   });
 }
+
+if (document.location.search.includes('shopify_employee')) {
+  chrome.runtime.sendMessage({
+    type: 'detect-shopify-employee',
+    hasDetectedShopifyEmployee: true,
+  });
+}

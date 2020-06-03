@@ -4,6 +4,7 @@ import {isDev, Oauth2} from './utils';
 const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
 const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
+let shopifyEmployee = false;
 
 function getOauth2Client(origin: string) {
   const identityDomain = isDev(origin)
@@ -19,7 +20,7 @@ function getOauth2Client(origin: string) {
     [
       'scope',
       `openid profile ${
-        (window as any).shopifyEmployee === true ? 'employee' : ''
+        shopifyEmployee === true ? 'employee' : ''
       } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
     ],
   ];
@@ -62,6 +63,20 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     });
 
   return true;
+});
+
+// Create a listener which handles when detectShopify.js, which executes in the
+// the same context as a tab, sends the results of of whether or not a Shopify
+// employee was detected
+chrome.runtime.onMessage.addListener((event, sender) => {
+  if (
+    sender.tab &&
+    sender.tab.id &&
+    event.type === 'detect-shopify-employee' &&
+    event.hasDetectedShopifyEmployee === true
+  ) {
+    shopifyEmployee = true;
+  }
 });
 
 // Create a listener which handles when detectShopify.js, which executes in the
@@ -108,7 +123,7 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     [
       'scope',
       `${
-        (window as any).shopifyEmployee === true ? 'employee' : ''
+        shopifyEmployee === true ? 'employee' : ''
       } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
     ],
   ];
