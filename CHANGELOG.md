@@ -1,5 +1,9 @@
 # Change Log
 
+
+## v1.0.7 (June 4, 2020)
+* [#54](https://github.com/Shopify/shopify-theme-inspector/pull/54) Add shopify employee scope
+
 ## v1.0.6 (May 27, 2020)
 * [#53](https://github.com/Shopify/shopify-theme-inspector/pull/53) Add collaborator scope
 
