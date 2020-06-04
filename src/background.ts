@@ -4,6 +4,7 @@ import {isDev, Oauth2} from './utils';
 const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
 const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
+let shopifyEmployee = false;
 
 function getOauth2Client(origin: string) {
   const identityDomain = isDev(origin)
@@ -16,7 +17,12 @@ function getOauth2Client(origin: string) {
     ? env.DEV_OAUTH2_SUBJECT_ID
     : env.OAUTH2_SUBJECT_ID;
   const clientAuthParams = [
-    ['scope', `openid profile ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`],
+    [
+      'scope',
+      `openid profile ${
+        shopifyEmployee === true ? 'employee' : ''
+      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+    ],
   ];
 
   return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
@@ -60,6 +66,20 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 });
 
 // Create a listener which handles when detectShopify.js, which executes in the
+// the same context as a tab, sends the results of of whether or not a Shopify
+// employee was detected
+chrome.runtime.onMessage.addListener((event, sender) => {
+  if (
+    sender.tab &&
+    sender.tab.id &&
+    event.type === 'detect-shopify-employee' &&
+    event.hasDetectedShopifyEmployee === true
+  ) {
+    shopifyEmployee = true;
+  }
+});
+
+// Create a listener which handles when detectShopify.js, which executes in the
 // the same context as a tab, sends the results of of whether or not Shopify was
 // detected
 chrome.runtime.onMessage.addListener((event, sender) => {
@@ -99,7 +119,14 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   }
 
   const oauth2 = getOauth2Client(origin);
-  const params = [['scope', `${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`]];
+  const params = [
+    [
+      'scope',
+      `${
+        shopifyEmployee === true ? 'employee' : ''
+      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+    ],
+  ];
   const destination = `${origin}/admin`;
 
   oauth2
