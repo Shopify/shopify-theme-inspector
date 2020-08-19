@@ -3,10 +3,10 @@
   "version": "1.0.7",
   "description": "Profile and debug Liquid template on your Shopify store",
   "devtools_page": "devtools.html",
-  "permissions": ["storage", "identity", "activeTab"],
+  "permissions": ["storage", "identity", "activeTab", "webRequest"],
   "background": {
     "scripts": ["background.js"],
-    "persistent": false
+    "persistent": true
   },
   "icons": {
     "16": "images/16-shopify.png",

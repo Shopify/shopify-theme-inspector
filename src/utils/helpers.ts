@@ -1,7 +1,12 @@
+import {RenderBackend} from '../env';
+
 const IS_CHROME = navigator.userAgent.indexOf('Firefox') < 0;
 
 export function isDev(origin: string): boolean {
-  return origin.includes('shop1.myshopify');
+  return (
+    origin.includes('shop1.myshopify') ||
+    origin.includes('shop1-fast.myshopify')
+  );
 }
 
 export function getThemeId() {
@@ -34,5 +39,30 @@ export function getBrowserTheme(): BrowserTheme {
     }
   } else {
     return 'light';
+  }
+}
+
+export function getRenderBackend(
+  response: chrome.webRequest.WebResponseHeadersDetails,
+): RenderBackend {
+  // Short-circuit for SFR in local dev mode
+  if (response.url.includes('shop1-fast.myshopify')) {
+    return RenderBackend.StorefrontRenderer;
+  }
+
+  if (typeof response.responseHeaders === 'undefined') {
+    return RenderBackend.Core;
+  }
+
+  const sfrRenderedHeader = response.responseHeaders.find(
+    header => header.name.toLowerCase() === 'x-storefront-renderer-rendered',
+  );
+  if (
+    typeof sfrRenderedHeader === 'object' &&
+    sfrRenderedHeader.value === '1'
+  ) {
+    return RenderBackend.StorefrontRenderer;
+  } else {
+    return RenderBackend.Core;
   }
 }

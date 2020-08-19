@@ -1,5 +1,5 @@
 import {env} from './env';
-import {isDev, Oauth2} from './utils';
+import {isDev, Oauth2, getRenderBackend} from './utils';
 
 const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
 const COLLABORATORS_SCOPE =
@@ -13,9 +13,9 @@ function getOauth2Client(origin: string) {
   const clientId = isDev(origin)
     ? env.DEV_OAUTH2_CLIENT_ID
     : env.OAUTH2_CLIENT_ID;
-  const subjectId = isDev(origin)
+  const subjectId = (isDev(origin)
     ? env.DEV_OAUTH2_SUBJECT_ID
-    : env.OAUTH2_SUBJECT_ID;
+    : env.OAUTH2_SUBJECT_ID)[env.renderBackend];
   const clientAuthParams = [
     [
       'scope',
@@ -46,6 +46,22 @@ function setIconAndPopup(active: string, tabId: number) {
     chrome.pageAction.setPopup({tabId, popup: './popupAuthFlow.html'});
   }
   chrome.pageAction.show(tabId);
+}
+
+// Detect what storefront backend is used. Logic taken from Ubercorn.
+if (typeof chrome.extension !== 'undefined') {
+  chrome.webRequest.onHeadersReceived.addListener(
+    response => {
+      chrome.tabs.query({active: true, currentWindow: true}, tabs => {
+        if (response.url === tabs[0].url) {
+          env.renderBackend = getRenderBackend(response);
+          console.log('Detected render backend:', env.renderBackend, response);
+        }
+      });
+    },
+    {urls: ['http://*/*', 'https://*/*']},
+    ['responseHeaders'],
+  );
 }
 
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
@@ -111,8 +127,7 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 });
 
 // Listen for 'request-core-access-token' event and respond to the messenger
-// with a valid Shopify Core access token. This may trigger a login popup window
-// if needed.
+// with a valid access token. This may trigger a login popup window if needed.
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-core-access-token') {
     return false;

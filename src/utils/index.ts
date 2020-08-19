@@ -1,5 +1,5 @@
 export {getProfileData} from './getProfileData';
-export {isDev, getThemeId, getBrowserTheme} from './helpers';
+export {isDev, getThemeId, getBrowserTheme, getRenderBackend} from './helpers';
 export {
   setTotalTime,
   formatNodeTime,
