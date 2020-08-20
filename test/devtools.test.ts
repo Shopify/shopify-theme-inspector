@@ -22,6 +22,7 @@ describe('Devtools', () => {
   it('test flamegraph shows when valid profile data exists', async () => {
     // @ts-ignore
     await page.$eval('[data-refresh-button]', elem => elem.click());
+    await page.waitForSelector('.d3-flame-graph');
     const flamegraphElement = await page.$eval(
       '.d3-flame-graph',
       elem => elem.textContent,
