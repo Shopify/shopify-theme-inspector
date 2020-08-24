@@ -18,7 +18,7 @@ Shopify themes are fast out of the box, but Liquid changes made afterwards can c
 3. Navigate to the Shopify tab, located in the top group of tabs in Chrome DevTools.
 4. Click the **↻** (Load Profile) button to request and view your Liquid profile [flamegraph](http://www.brendangregg.com/FlameGraphs/cpuflamegraphs.html#Description).
 
-**Note:** Development stores cannot generate a liquid profiled. Shopify is working on this issue.
+**Note:** Development stores cannot generate a liquid profile. [Shopify is working on this issue](https://github.com/Shopify/shopify-theme-inspector/issues/55).
 
 ## Share your Performance Wins!
 We would love to learn how you use this tool and solve your Liquid rendering issues. Please share by [making a comment here](https://github.com/Shopify/shopify-theme-inspector/issues/41) and/or tweet us about your win [@shopifydevs](https://twitter.com/shopifydevs).
