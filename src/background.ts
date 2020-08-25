@@ -13,9 +13,12 @@ function getOauth2Client(origin: string) {
   const clientId = isDev(origin)
     ? env.DEV_OAUTH2_CLIENT_ID
     : env.OAUTH2_CLIENT_ID;
-  const subjectId = (isDev(origin)
-    ? env.DEV_OAUTH2_SUBJECT_ID
-    : env.OAUTH2_SUBJECT_ID)[env.renderBackend];
+  const subjectId = isDev(origin)
+    ? null
+    : env.OAUTH2_SUBJECT_ID[env.renderBackend];
+  const subjectName = isDev(origin)
+    ? env.DEV_OAUTH2_SUBJECT_NAME[env.renderBackend]
+    : null;
   const clientAuthParams = [
     [
       'scope',
@@ -25,7 +28,9 @@ function getOauth2Client(origin: string) {
     ],
   ];
 
-  return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
+  return new Oauth2(clientId, subjectId, subjectName, identityDomain, {
+    clientAuthParams,
+  });
 }
 
 // Change icon from colored to greyscale depending on whether or not Shopify has

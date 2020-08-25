@@ -30,19 +30,25 @@ const DEFAULT_OPTIONS: Oauth2Options = {
 
 export class Oauth2 {
   clientId: string;
-  subjectId: string;
+  subjectId: string | null;
+  subjectName: string | null;
   domain: string;
   options: Oauth2Options;
   config?: OpenIdConfig;
 
   public constructor(
     clientId: string,
-    subjectId: string,
+    subjectId: string | null,
+    subjectName: string | null,
     domain: string,
     options: Oauth2OptionsArgument,
   ) {
+    if (subjectId == null && subjectName == null) {
+      throw Error('subjectId or subjectName is required');
+    }
     this.clientId = clientId;
     this.subjectId = subjectId;
+    this.subjectName = subjectName;
     this.domain = domain;
     this.options = {...DEFAULT_OPTIONS, ...options};
   }
@@ -57,6 +63,35 @@ export class Oauth2 {
       ...clientAuthParams,
       ...params,
     ]);
+  }
+
+  /**
+   * Fetch the client ID of an OAuth application using
+   * [Dynamic Registration Endpoint](https://identity.docs.shopify.io/oauth/dynamic-registration-endpoint/).
+   */
+  public async fetchClientId(name: string): Promise<string> {
+    const config = await this.getConfig();
+    const baseUrl = config.issuer;
+    const token = await this.getClientAccessTokenFromStorage(this.clientId);
+
+    // This endpoint is hard coded because it is not standard oauth
+    const url = new URL(`${baseUrl}/oauth/client`);
+    url.search = new URLSearchParams([['name[]', name]]).toString();
+
+    const response = await fetch(url.href, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token!.accessToken}`,
+      },
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      throw Error(json.error_description);
+    }
+
+    return json.applications[name].client_id;
   }
 
   /**
@@ -361,10 +396,20 @@ export class Oauth2 {
     destination: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
-    const {clientId, subjectId} = this;
+    const {clientId, subjectName} = this;
     const config = await this.getConfig();
     const {accessToken} = await this.authenticate();
     const url = new URL(config.token_endpoint);
+
+    let subjectId;
+    if (this.subjectId == null) {
+      if (subjectName == null) {
+        throw Error('subjectName is required');
+      }
+      subjectId = await this.fetchClientId(subjectName);
+    } else {
+      subjectId = this.subjectId;
+    }
 
     url.search = new URLSearchParams([
       ['grant_type', 'urn:ietf:params:oauth:grant-type:token-exchange'],

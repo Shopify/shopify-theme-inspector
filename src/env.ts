@@ -13,10 +13,9 @@ export const env = {
       '7ee65a63608843c577db8b23c4d7316ea0a01bd2f7594f8a9c06ea668c1b775c',
     [RenderBackend.StorefrontRenderer]: 'ee139b3d-5861-4d45-b387-1bc3ada7811c',
   },
-  DEV_OAUTH2_SUBJECT_ID: {
-    [RenderBackend.Core]:
-      'e92482cebb9bfb9fb5a0199cc770fde3de6c8d16b798ee73e36c9d815e070e52',
-    [RenderBackend.StorefrontRenderer]: '73922abc-7637-443a-bad5-aee8c0b63ba6',
+  DEV_OAUTH2_SUBJECT_NAME: {
+    [RenderBackend.Core]: 'shopify-development',
+    [RenderBackend.StorefrontRenderer]: 'storefront-renderer-development',
   },
   OAUTH_LOCAL_STORAGE_KEY: 'shopifyDevToolsAuthResults',
 
