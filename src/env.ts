@@ -17,6 +17,12 @@ export const env = {
     [RenderBackend.Core]: 'shopify-development',
     [RenderBackend.StorefrontRenderer]: 'storefront-renderer-development',
   },
+  DEVTOOLS_SCOPE: {
+    [RenderBackend.Core]:
+      'https://api.shopify.com/auth/shop.storefront.devtools',
+    [RenderBackend.StorefrontRenderer]:
+      'https://api.shopify.com/auth/shop.storefront-renderer.devtools',
+  },
   OAUTH_LOCAL_STORAGE_KEY: 'shopifyDevToolsAuthResults',
 
   renderBackend: RenderBackend.Core,

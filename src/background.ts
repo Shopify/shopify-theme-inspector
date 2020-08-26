@@ -1,7 +1,6 @@
 import {env} from './env';
 import {isDev, Oauth2, getRenderBackend} from './utils';
 
-const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
 const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
 let shopifyEmployee = false;
@@ -24,7 +23,7 @@ function getOauth2Client(origin: string) {
       'scope',
       `openid profile ${
         shopifyEmployee === true ? 'employee' : ''
-      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+      } ${Object.values(env.DEVTOOLS_SCOPE).join(' ')} ${COLLABORATORS_SCOPE}`,
     ],
   ];
 
@@ -60,7 +59,7 @@ if (typeof chrome.extension !== 'undefined') {
       chrome.tabs.query({active: true, currentWindow: true}, tabs => {
         if (response.url === tabs[0].url) {
           env.renderBackend = getRenderBackend(response);
-          console.log('Detected render backend:', env.renderBackend, response);
+          console.log('Detected render backend:', env.renderBackend);
         }
       });
     },
@@ -142,9 +141,9 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   const params = [
     [
       'scope',
-      `${
-        shopifyEmployee === true ? 'employee' : ''
-      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+      `${shopifyEmployee === true ? 'employee' : ''} ${
+        env.DEVTOOLS_SCOPE[env.renderBackend]
+      } ${COLLABORATORS_SCOPE}`,
     ],
   ];
   const destination = `${origin}/admin`;
