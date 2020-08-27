@@ -1,4 +1,4 @@
-import {env} from './env';
+import {env, RenderBackend} from './env';
 import {isDev, Oauth2, getRenderBackend} from './utils';
 
 const COLLABORATORS_SCOPE =
@@ -146,7 +146,10 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
       } ${COLLABORATORS_SCOPE}`,
     ],
   ];
-  const destination = `${origin}/admin`;
+
+  // SFR does not need a destination.
+  const destination =
+    env.renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
 
   oauth2
     .getSubjectAccessToken(destination, params)
