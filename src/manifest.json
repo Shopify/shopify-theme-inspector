@@ -6,7 +6,7 @@
   "permissions": ["storage", "identity", "activeTab"],
   "background": {
     "scripts": ["background.js"],
-    "persistent": true
+    "persistent": false
   },
   "icons": {
     "16": "images/16-shopify.png",
