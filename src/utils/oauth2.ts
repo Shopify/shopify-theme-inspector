@@ -30,24 +30,18 @@ const DEFAULT_OPTIONS: Oauth2Options = {
 
 export class Oauth2 {
   clientId: string;
-  subjectId: string | null;
-  subjectName: string | null;
+  subjectName: string;
   domain: string;
   options: Oauth2Options;
   config?: OpenIdConfig;
 
   public constructor(
     clientId: string,
-    subjectId: string | null,
-    subjectName: string | null,
+    subjectName: string,
     domain: string,
     options: Oauth2OptionsArgument,
   ) {
-    if (subjectId == null && subjectName == null) {
-      throw Error('subjectId or subjectName is required');
-    }
     this.clientId = clientId;
-    this.subjectId = subjectId;
     this.subjectName = subjectName;
     this.domain = domain;
     this.options = {...DEFAULT_OPTIONS, ...options};
@@ -400,16 +394,7 @@ export class Oauth2 {
     const config = await this.getConfig();
     const {accessToken} = await this.authenticate();
     const url = new URL(config.token_endpoint);
-
-    let subjectId;
-    if (this.subjectId == null) {
-      if (subjectName == null) {
-        throw Error('subjectName is required');
-      }
-      subjectId = await this.fetchClientId(subjectName);
-    } else {
-      subjectId = this.subjectId;
-    }
+    const subjectId = await this.fetchClientId(subjectName);
 
     url.search = new URLSearchParams([
       ['grant_type', 'urn:ietf:params:oauth:grant-type:token-exchange'],

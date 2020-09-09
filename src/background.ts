@@ -13,10 +13,9 @@ async function getOauth2Client(origin: string) {
   const clientId = isDev(origin)
     ? env.DEV_OAUTH2_CLIENT_ID
     : env.OAUTH2_CLIENT_ID;
-  const subjectId = isDev(origin) ? null : env.OAUTH2_SUBJECT_ID[renderBackend];
   const subjectName = isDev(origin)
     ? env.DEV_OAUTH2_SUBJECT_NAME[renderBackend]
-    : null;
+    : env.OAUTH2_SUBJECT_NAME[renderBackend];
   const clientAuthParams = [
     [
       'scope',
@@ -26,7 +25,7 @@ async function getOauth2Client(origin: string) {
     ],
   ];
 
-  return new Oauth2(clientId, subjectId, subjectName, identityDomain, {
+  return new Oauth2(clientId, subjectName, identityDomain, {
     clientAuthParams,
   });
 }
