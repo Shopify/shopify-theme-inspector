@@ -24,6 +24,4 @@ export const env = {
       'https://api.shopify.com/auth/shop.storefront-renderer.devtools',
   },
   OAUTH_LOCAL_STORAGE_KEY: 'shopifyDevToolsAuthResults',
-
-  renderBackend: RenderBackend.Core,
 };

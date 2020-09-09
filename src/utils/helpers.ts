@@ -42,27 +42,12 @@ export function getBrowserTheme(): BrowserTheme {
   }
 }
 
-export function getRenderBackend(
-  response: chrome.webRequest.WebResponseHeadersDetails,
-): RenderBackend {
-  // Short-circuit for SFR in local dev mode
-  if (response.url.includes('shop1-fast.myshopify')) {
-    return RenderBackend.StorefrontRenderer;
-  }
-
-  if (typeof response.responseHeaders === 'undefined') {
-    return RenderBackend.Core;
-  }
-
-  const sfrRenderedHeader = response.responseHeaders.find(
-    header => header.name.toLowerCase() === 'x-storefront-renderer-rendered',
-  );
-  if (
-    typeof sfrRenderedHeader === 'object' &&
-    sfrRenderedHeader.value === '1'
-  ) {
-    return RenderBackend.StorefrontRenderer;
-  } else {
-    return RenderBackend.Core;
-  }
+export function getRenderBackend(): Promise<RenderBackend> {
+  return new Promise(resolve => {
+    chrome.devtools.inspectedWindow.eval(
+      "typeof BOOMR !== 'undefined' && BOOMR.application === 'storefront-renderer'",
+      (result: boolean) =>
+        resolve(result ? RenderBackend.StorefrontRenderer : RenderBackend.Core),
+    );
+  });
 }
