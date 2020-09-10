@@ -5,8 +5,7 @@ const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
 let shopifyEmployee = false;
 
-async function getOauth2Client(origin: string) {
-  const renderBackend = await getRenderBackend();
+function getOauth2Client(origin: string, renderBackend: RenderBackend) {
   const identityDomain = isDev(origin)
     ? env.DEV_OAUTH2_DOMAIN
     : env.OAUTH2_DOMAIN;
@@ -53,9 +52,9 @@ function setIconAndPopup(active: string, tabId: number) {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'signOut') return false;
 
-  getOauth2Client(origin)
-    .then(oauth2 => {
-      return oauth2.logoutUser();
+  getRenderBackend()
+    .then(renderBackend => {
+      return getOauth2Client(origin, renderBackend).logoutUser();
     })
     .then(() => {
       sendResponse();
@@ -97,9 +96,9 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     return false;
   }
 
-  getOauth2Client(origin)
-    .then(oauth2 => {
-      return oauth2.authenticate();
+  getRenderBackend()
+    .then(renderBackend => {
+      return getOauth2Client(origin, renderBackend).authenticate();
     })
     .then(() => {
       sendResponse({success: true});
@@ -119,8 +118,8 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     return false;
   }
 
-  Promise.all([getRenderBackend(), getOauth2Client(origin)])
-    .then(([renderBackend, oauth2]) => {
+  getRenderBackend()
+    .then(renderBackend => {
       const params = [
         [
           'scope',
@@ -134,7 +133,10 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
       const destination =
         renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
 
-      return oauth2.getSubjectAccessToken(destination, params);
+      return getOauth2Client(origin, renderBackend).getSubjectAccessToken(
+        destination,
+        params,
+      );
     })
     .then(token => {
       sendResponse({token});
@@ -151,9 +153,9 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-user-name') return false;
 
-  getOauth2Client(origin)
-    .then(oauth2 => {
-      return oauth2.getUserInfo();
+  getRenderBackend()
+    .then(renderBackend => {
+      return getOauth2Client(origin, renderBackend).getUserInfo();
     })
     .then(userInfo => {
       const name = userInfo.given_name;
@@ -171,9 +173,9 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-auth-status') return false;
 
-  getOauth2Client(origin)
-    .then(oauth2 => {
-      return oauth2.hasValidClientToken();
+  getRenderBackend()
+    .then(renderBackend => {
+      return getOauth2Client(origin, renderBackend).hasValidClientToken();
     })
     .then(isLoggedIn => {
       sendResponse({isLoggedIn});
