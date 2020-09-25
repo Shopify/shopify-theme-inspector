@@ -96,6 +96,7 @@ If you see this error, it may be because of one of the following conditions:
   * You might be trying to profile a checkout page, which is not supported by this extension.
   * There was an unhandled error in the request, e.g. timeout, lost connection, etc.
   * You might be trying to profile a development store. We can't profile it yet when you're logged in as the owner. See [issue #55](https://github.com/Shopify/shopify-theme-inspector/issues/55) for a workaround.
+  * This might be a known bug: If your store uses Storefront Renderer, we can't profile it yet. We're working hard to fix it. Subscribe to [pull request #63](https://github.com/Shopify/shopify-theme-inspector/pull/63) to get updates.
 
 If it was none of the errors above you can right click on Shopify DevTools , inspect page, and view console for error details.
 
