@@ -95,6 +95,7 @@ If you see this error, it may be because of one of the following conditions:
   * Your account does not have access to the current store you are trying to profile.
   * You might be trying to profile a checkout page, which is not supported by this extension.
   * There was an unhandled error in the request, e.g. timeout, lost connection, etc.
+  * You might be trying to profile a development store. We can't profile it yet when you're logged in as the owner. See [issue #55](https://github.com/Shopify/shopify-theme-inspector/issues/55) for a workaround.
 
 If it was none of the errors above you can right click on Shopify DevTools , inspect page, and view console for error details.
 
