@@ -1,5 +1,3 @@
-import {RenderBackend} from '../env';
-
 const IS_CHROME = navigator.userAgent.indexOf('Firefox') < 0;
 
 export function isDev(origin: string): boolean {
@@ -40,14 +38,4 @@ export function getBrowserTheme(): BrowserTheme {
   } else {
     return 'light';
   }
-}
-
-export function getRenderBackend(): Promise<RenderBackend> {
-  return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval(
-      "typeof BOOMR !== 'undefined' && BOOMR.application === 'storefront-renderer'",
-      (result: boolean) =>
-        resolve(result ? RenderBackend.StorefrontRenderer : RenderBackend.Core),
-    );
-  });
 }

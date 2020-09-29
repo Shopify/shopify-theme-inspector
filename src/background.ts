@@ -1,11 +1,12 @@
 import {env, RenderBackend} from './env';
-import {isDev, Oauth2, getRenderBackend} from './utils';
+import {isDev, Oauth2} from './utils';
 
 const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
 let shopifyEmployee = false;
+let renderBackend = RenderBackend.StorefrontRenderer;
 
-function getOauth2Client(origin: string, renderBackend: RenderBackend) {
+function getOauth2Client(origin: string) {
   const identityDomain = isDev(origin)
     ? env.DEV_OAUTH2_DOMAIN
     : env.OAUTH2_DOMAIN;
@@ -52,10 +53,8 @@ function setIconAndPopup(active: string, tabId: number) {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'signOut') return false;
 
-  getRenderBackend()
-    .then(renderBackend => {
-      return getOauth2Client(origin, renderBackend).logoutUser();
-    })
+  getOauth2Client(origin)
+    .logoutUser()
     .then(() => {
       sendResponse();
     })
@@ -86,6 +85,9 @@ chrome.runtime.onMessage.addListener((event, sender) => {
 chrome.runtime.onMessage.addListener((event, sender) => {
   if (sender.tab && sender.tab.id && event.type === 'detect-shopify') {
     setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
+    renderBackend = event.isCore
+      ? RenderBackend.Core
+      : RenderBackend.StorefrontRenderer;
   }
 });
 
@@ -96,10 +98,8 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     return false;
   }
 
-  getRenderBackend()
-    .then(renderBackend => {
-      return getOauth2Client(origin, renderBackend).authenticate();
-    })
+  getOauth2Client(origin)
+    .authenticate()
     .then(() => {
       sendResponse({success: true});
     })
@@ -118,26 +118,21 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     return false;
   }
 
-  getRenderBackend()
-    .then(renderBackend => {
-      const params = [
-        [
-          'scope',
-          `${shopifyEmployee === true ? 'employee' : ''} ${
-            env.DEVTOOLS_SCOPE[renderBackend]
-          } ${COLLABORATORS_SCOPE}`,
-        ],
-      ];
+  const params = [
+    [
+      'scope',
+      `${shopifyEmployee === true ? 'employee' : ''} ${
+        env.DEVTOOLS_SCOPE[renderBackend]
+      } ${COLLABORATORS_SCOPE}`,
+    ],
+  ];
 
-      // SFR does not need a destination.
-      const destination =
-        renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
+  // SFR does not need a destination.
+  const destination =
+    renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
 
-      return getOauth2Client(origin, renderBackend).getSubjectAccessToken(
-        destination,
-        params,
-      );
-    })
+  getOauth2Client(origin)
+    .getSubjectAccessToken(destination, params)
     .then(token => {
       sendResponse({token});
     })
@@ -153,10 +148,8 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-user-name') return false;
 
-  getRenderBackend()
-    .then(renderBackend => {
-      return getOauth2Client(origin, renderBackend).getUserInfo();
-    })
+  getOauth2Client(origin)
+    .getUserInfo()
     .then(userInfo => {
       const name = userInfo.given_name;
       sendResponse({name});
@@ -173,10 +166,8 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-auth-status') return false;
 
-  getRenderBackend()
-    .then(renderBackend => {
-      return getOauth2Client(origin, renderBackend).hasValidClientToken();
-    })
+  getOauth2Client(origin)
+    .hasValidClientToken()
     .then(isLoggedIn => {
       sendResponse({isLoggedIn});
     })
