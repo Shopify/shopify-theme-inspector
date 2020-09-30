@@ -30,19 +30,16 @@ const DEFAULT_OPTIONS: Oauth2Options = {
 
 export class Oauth2 {
   clientId: string;
-  subjectName: string;
   domain: string;
   options: Oauth2Options;
   config?: OpenIdConfig;
 
   public constructor(
     clientId: string,
-    subjectName: string,
     domain: string,
     options: Oauth2OptionsArgument,
   ) {
     this.clientId = clientId;
-    this.subjectName = subjectName;
     this.domain = domain;
     this.options = {...DEFAULT_OPTIONS, ...options};
   }
@@ -97,9 +94,14 @@ export class Oauth2 {
    */
   public getSubjectAccessToken(
     destination: string,
+    subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
-    return this.getValidSubjectAccessTokenAndSave(destination, params);
+    return this.getValidSubjectAccessTokenAndSave(
+      destination,
+      subjectId,
+      params,
+    );
   }
 
   /*
@@ -233,15 +235,16 @@ export class Oauth2 {
    */
   private async getValidSubjectAccessTokenAndSave(
     destination: string,
+    subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
     let token = await this.getSubjectAccessTokenFromStorage(destination);
     // If no access token then start new access token flow
     if (typeof token === 'undefined') {
-      token = await this.exchangeToken(destination, params);
+      token = await this.exchangeToken(destination, subjectId, params);
     } else if (await this.isAccessTokenInvalid(token)) {
       // If there is an access token but its not valid or expired
-      token = await this.exchangeToken(destination, params);
+      token = await this.exchangeToken(destination, subjectId, params);
     }
 
     await saveToLocalStorage(destination, JSON.stringify(token));
@@ -388,17 +391,16 @@ export class Oauth2 {
    */
   private async exchangeToken(
     destination: string,
+    subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
-    const {clientId, subjectName} = this;
     const config = await this.getConfig();
     const {accessToken} = await this.authenticate();
     const url = new URL(config.token_endpoint);
-    const subjectId = await this.fetchClientId(subjectName);
 
     url.search = new URLSearchParams([
       ['grant_type', 'urn:ietf:params:oauth:grant-type:token-exchange'],
-      ['client_id', clientId],
+      ['client_id', this.clientId],
       ['audience', subjectId],
       ['subject_token', accessToken],
       ['subject_token_type', 'urn:ietf:params:oauth:token-type:access_token'],

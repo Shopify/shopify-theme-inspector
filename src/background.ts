@@ -13,9 +13,6 @@ function getOauth2Client(origin: string) {
   const clientId = isDev(origin)
     ? env.DEV_OAUTH2_CLIENT_ID
     : env.OAUTH2_CLIENT_ID;
-  const subjectName = isDev(origin)
-    ? env.DEV_OAUTH2_SUBJECT_NAME[renderBackend]
-    : env.OAUTH2_SUBJECT_NAME[renderBackend];
   const clientAuthParams = [
     [
       'scope',
@@ -25,7 +22,7 @@ function getOauth2Client(origin: string) {
     ],
   ];
 
-  return new Oauth2(clientId, subjectName, identityDomain, {
+  return new Oauth2(clientId, identityDomain, {
     clientAuthParams,
   });
 }
@@ -48,6 +45,13 @@ function setIconAndPopup(active: string, tabId: number) {
     chrome.pageAction.setPopup({tabId, popup: './popupAuthFlow.html'});
   }
   chrome.pageAction.show(tabId);
+}
+
+function getSubjectId(oauth: Oauth2, origin: string) {
+  if (isDev(origin)) {
+    return oauth.fetchClientId(env.DEV_OAUTH2_SUBJECT_NAME[renderBackend]);
+  }
+  return Promise.resolve(env.OAUTH2_SUBJECT_ID[renderBackend]);
 }
 
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
@@ -131,8 +135,12 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   const destination =
     renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
 
-  getOauth2Client(origin)
-    .getSubjectAccessToken(destination, params)
+  const oauth = getOauth2Client(origin);
+
+  getSubjectId(oauth, origin)
+    .then(subjectId => {
+      return oauth.getSubjectAccessToken(destination, subjectId, params);
+    })
     .then(token => {
       sendResponse({token});
     })
