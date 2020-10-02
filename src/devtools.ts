@@ -4,6 +4,7 @@ import LiquidFlamegraph from './components/liquid-flamegraph';
 import {
   getProfileData,
   setTotalTime,
+  setRenderingBackend,
   getBrowserTheme,
   emptyHTMLNode,
 } from './utils';
@@ -90,6 +91,20 @@ function getInspectedWindowURL(): Promise<URL> {
   });
 }
 
+function getRenderingBackend(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    chrome.runtime.sendMessage(
+      {type: 'request-rendering-backend'},
+      ({name, error}) => {
+        if (error) {
+          return reject(error);
+        }
+        return resolve(name);
+      },
+    );
+  });
+}
+
 async function refreshPanel() {
   emptyHTMLNode(document.querySelector(selectors.initialMessage));
   document
@@ -117,10 +132,13 @@ async function refreshPanel() {
       url,
     );
 
+    const renderingBackend = await getRenderingBackend();
+
     // All events happening here are synchronous. The set timeout is for UI
     // purposes so that timing information gets displayed after the flamegraph is shown.
     setTimeout(function() {
       setTotalTime(profile.value);
+      setRenderingBackend(renderingBackend);
     }, 300);
 
     document

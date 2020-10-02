@@ -185,3 +185,12 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 
   return true;
 });
+
+chrome.runtime.onMessage.addListener(({type}, _, sendResponse) => {
+  if (type !== 'request-rendering-backend') return false;
+
+  const name = renderBackend.toString();
+  sendResponse({name});
+
+  return true;
+});

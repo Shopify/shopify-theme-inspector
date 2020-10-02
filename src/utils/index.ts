@@ -2,6 +2,7 @@ export {getProfileData} from './getProfileData';
 export {isDev, getThemeId, getBrowserTheme} from './helpers';
 export {
   setTotalTime,
+  setRenderingBackend,
   formatNodeTime,
   emptyHTMLNode,
   updateInfoText,

@@ -2,6 +2,10 @@ export function setTotalTime(totalTime: number) {
   updateInfoText('[data-total-time]', `${Math.trunc(totalTime * 1000)}ms`);
 }
 
+export function setRenderingBackend(backend: string) {
+  updateInfoText('[data-rendering-backend]', backend);
+}
+
 export function formatNodeTime(nodeTime: number) {
   const nodeTimeMs = Math.trunc(nodeTime * 1000);
   if (nodeTimeMs > 0) {

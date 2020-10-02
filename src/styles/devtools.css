@@ -165,7 +165,7 @@ body {
   margin: 20px;
 }
 
-.total-time {
+.total-time, .rendering-backend {
   margin: 20px;
   font-size: 13px;
 }
