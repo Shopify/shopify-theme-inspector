@@ -1,6 +1,9 @@
 # Change Log
 
 
+## v1.1.0 (Oct 2, 2020)
+* [#63](https://github.com/Shopify/shopify-theme-inspector/pull/63) Add storefront-renderer support
+
 ## v1.0.7 (June 4, 2020)
 * [#54](https://github.com/Shopify/shopify-theme-inspector/pull/54) Add shopify employee scope
 

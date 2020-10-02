@@ -1,10 +1,10 @@
-import {env} from './env';
+import {env, RenderBackend} from './env';
 import {isDev, Oauth2} from './utils';
 
-const DEVTOOLS_SCOPE = 'https://api.shopify.com/auth/shop.storefront.devtools';
 const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
 let shopifyEmployee = false;
+let renderBackend = RenderBackend.StorefrontRenderer;
 
 function getOauth2Client(origin: string) {
   const identityDomain = isDev(origin)
@@ -13,19 +13,18 @@ function getOauth2Client(origin: string) {
   const clientId = isDev(origin)
     ? env.DEV_OAUTH2_CLIENT_ID
     : env.OAUTH2_CLIENT_ID;
-  const subjectId = isDev(origin)
-    ? env.DEV_OAUTH2_SUBJECT_ID
-    : env.OAUTH2_SUBJECT_ID;
   const clientAuthParams = [
     [
       'scope',
       `openid profile ${
         shopifyEmployee === true ? 'employee' : ''
-      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+      } ${Object.values(env.DEVTOOLS_SCOPE).join(' ')} ${COLLABORATORS_SCOPE}`,
     ],
   ];
 
-  return new Oauth2(clientId, subjectId, identityDomain, {clientAuthParams});
+  return new Oauth2(clientId, identityDomain, {
+    clientAuthParams,
+  });
 }
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
@@ -48,12 +47,17 @@ function setIconAndPopup(active: string, tabId: number) {
   chrome.pageAction.show(tabId);
 }
 
+function getSubjectId(oauth: Oauth2, origin: string) {
+  if (isDev(origin)) {
+    return oauth.fetchClientId(env.DEV_OAUTH2_SUBJECT_NAME[renderBackend]);
+  }
+  return Promise.resolve(env.OAUTH2_SUBJECT_ID[renderBackend]);
+}
+
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'signOut') return false;
 
-  const oauth2 = getOauth2Client(origin);
-
-  oauth2
+  getOauth2Client(origin)
     .logoutUser()
     .then(() => {
       sendResponse();
@@ -85,6 +89,9 @@ chrome.runtime.onMessage.addListener((event, sender) => {
 chrome.runtime.onMessage.addListener((event, sender) => {
   if (sender.tab && sender.tab.id && event.type === 'detect-shopify') {
     setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
+    renderBackend = event.isCore
+      ? RenderBackend.Core
+      : RenderBackend.StorefrontRenderer;
   }
 });
 
@@ -95,9 +102,7 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     return false;
   }
 
-  const oauth2 = getOauth2Client(origin);
-
-  oauth2
+  getOauth2Client(origin)
     .authenticate()
     .then(() => {
       sendResponse({success: true});
@@ -111,26 +116,31 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 });
 
 // Listen for 'request-core-access-token' event and respond to the messenger
-// with a valid Shopify Core access token. This may trigger a login popup window
-// if needed.
+// with a valid access token. This may trigger a login popup window if needed.
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-core-access-token') {
     return false;
   }
 
-  const oauth2 = getOauth2Client(origin);
   const params = [
     [
       'scope',
-      `${
-        shopifyEmployee === true ? 'employee' : ''
-      } ${DEVTOOLS_SCOPE} ${COLLABORATORS_SCOPE}`,
+      `${shopifyEmployee === true ? 'employee' : ''} ${
+        env.DEVTOOLS_SCOPE[renderBackend]
+      } ${COLLABORATORS_SCOPE}`,
     ],
   ];
-  const destination = `${origin}/admin`;
 
-  oauth2
-    .getSubjectAccessToken(destination, params)
+  // SFR does not need a destination.
+  const destination =
+    renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
+
+  const oauth = getOauth2Client(origin);
+
+  getSubjectId(oauth, origin)
+    .then(subjectId => {
+      return oauth.getSubjectAccessToken(destination, subjectId, params);
+    })
     .then(token => {
       sendResponse({token});
     })
@@ -146,9 +156,7 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-user-name') return false;
 
-  const oauth2 = getOauth2Client(origin);
-
-  oauth2
+  getOauth2Client(origin)
     .getUserInfo()
     .then(userInfo => {
       const name = userInfo.given_name;
@@ -166,9 +174,7 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
   if (type !== 'request-auth-status') return false;
 
-  const oauth2 = getOauth2Client(origin);
-
-  oauth2
+  getOauth2Client(origin)
     .hasValidClientToken()
     .then(isLoggedIn => {
       sendResponse({isLoggedIn});
@@ -176,6 +182,15 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     .catch(error => {
       sendResponse({error});
     });
+
+  return true;
+});
+
+chrome.runtime.onMessage.addListener(({type}, _, sendResponse) => {
+  if (type !== 'request-rendering-backend') return false;
+
+  const name = renderBackend.toString();
+  sendResponse({name});
 
   return true;
 });

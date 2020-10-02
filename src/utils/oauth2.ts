@@ -30,19 +30,16 @@ const DEFAULT_OPTIONS: Oauth2Options = {
 
 export class Oauth2 {
   clientId: string;
-  subjectId: string;
   domain: string;
   options: Oauth2Options;
   config?: OpenIdConfig;
 
   public constructor(
     clientId: string,
-    subjectId: string,
     domain: string,
     options: Oauth2OptionsArgument,
   ) {
     this.clientId = clientId;
-    this.subjectId = subjectId;
     this.domain = domain;
     this.options = {...DEFAULT_OPTIONS, ...options};
   }
@@ -60,6 +57,35 @@ export class Oauth2 {
   }
 
   /**
+   * Fetch the client ID of an OAuth application using
+   * [Dynamic Registration Endpoint](https://identity.docs.shopify.io/oauth/dynamic-registration-endpoint/).
+   */
+  public async fetchClientId(name: string): Promise<string> {
+    const config = await this.getConfig();
+    const baseUrl = config.issuer;
+    const token = await this.getClientAccessTokenFromStorage(this.clientId);
+
+    // This endpoint is hard coded because it is not standard oauth
+    const url = new URL(`${baseUrl}/oauth/client`);
+    url.search = new URLSearchParams([['name[]', name]]).toString();
+
+    const response = await fetch(url.href, {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token!.accessToken}`,
+      },
+    });
+
+    const json = await response.json();
+
+    if (!response.ok) {
+      throw Error(json.error_description);
+    }
+
+    return json.applications[name].client_id;
+  }
+
+  /**
    * Get a valid access token for the given application via storage, refresh
    * token, or via token exchange using a valid client token.
    *
@@ -68,9 +94,14 @@ export class Oauth2 {
    */
   public getSubjectAccessToken(
     destination: string,
+    subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
-    return this.getValidSubjectAccessTokenAndSave(destination, params);
+    return this.getValidSubjectAccessTokenAndSave(
+      destination,
+      subjectId,
+      params,
+    );
   }
 
   /*
@@ -204,15 +235,16 @@ export class Oauth2 {
    */
   private async getValidSubjectAccessTokenAndSave(
     destination: string,
+    subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
     let token = await this.getSubjectAccessTokenFromStorage(destination);
     // If no access token then start new access token flow
     if (typeof token === 'undefined') {
-      token = await this.exchangeToken(destination, params);
+      token = await this.exchangeToken(destination, subjectId, params);
     } else if (await this.isAccessTokenInvalid(token)) {
       // If there is an access token but its not valid or expired
-      token = await this.exchangeToken(destination, params);
+      token = await this.exchangeToken(destination, subjectId, params);
     }
 
     await saveToLocalStorage(destination, JSON.stringify(token));
@@ -359,16 +391,16 @@ export class Oauth2 {
    */
   private async exchangeToken(
     destination: string,
+    subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
-    const {clientId, subjectId} = this;
     const config = await this.getConfig();
     const {accessToken} = await this.authenticate();
     const url = new URL(config.token_endpoint);
 
     url.search = new URLSearchParams([
       ['grant_type', 'urn:ietf:params:oauth:grant-type:token-exchange'],
-      ['client_id', clientId],
+      ['client_id', this.clientId],
       ['audience', subjectId],
       ['subject_token', accessToken],
       ['subject_token_type', 'urn:ietf:params:oauth:token-type:access_token'],
