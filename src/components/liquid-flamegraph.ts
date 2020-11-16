@@ -75,6 +75,7 @@ export default class LiquidFlamegraph {
     const clickableLink = await this.generateClickableLink(
       node.data.name,
       node.data.line,
+      node.data.code,
     );
 
     const codeLink = document.querySelector(selectors.code);
@@ -87,12 +88,14 @@ export default class LiquidFlamegraph {
   async generateClickableLink(
     fileName: string,
     lineNumber: number,
+    code: string,
   ): Promise<any> {
     const url = this.url;
     const hostname = url.hostname;
     const themeId = await getThemeId();
     const fileDetails = fileName.split(':');
-    const link = `https://${hostname}/admin/themes/${themeId}?key=${fileDetails[0]}s/${fileDetails[1]}.liquid&line=${lineNumber}`;
+    const extension = /sections everywhere/i.test(code) ? 'json' : 'liquid';
+    const link = `https://${hostname}/admin/themes/${themeId}?key=${fileDetails[0]}s/${fileDetails[1]}.${extension}&line=${lineNumber}`;
     return link;
   }
 
