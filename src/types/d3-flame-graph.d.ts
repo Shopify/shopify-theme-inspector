@@ -7,6 +7,7 @@ interface FlamegraphNode {
     value: number;
     children: FlamegraphNode[];
     code: string;
+    filename: string;
     fade: boolean;
     hide: boolean;
     line: number;

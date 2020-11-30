@@ -54,12 +54,28 @@ function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
 function formatLiquidProfileData(
   entries: ProfileNode[],
 ): FormattedProfileNode[] {
-  return entries.map(function(entry: ProfileNode) {
-    if (!entry.partial.includes(':')) {
-      entry.partial = `snippet:${entry.partial}`;
+  return entries.map((entry: ProfileNode) => {
+    const nameParts = entry.partial.split('/');
+    let name = '';
+    let filename = null;
+    if (nameParts.length === 1 && !entry.partial.includes(':')) {
+      name = `snippet:${entry.partial}`;
+      filename = `snippets/${entry.partial}.liquid`;
+    } else if (/shopify:\/\/apps/.test(entry.partial)) {
+      name = `app-${nameParts[4].slice(0, -1)}:${nameParts[3]}`;
+      entry.code = entry.code || entry.partial;
+    } else if (nameParts[0] === 'sections') {
+      name = `section:${nameParts[1].replace(/\.liquid$/, '')}`;
+      filename = entry.partial;
+    } else {
+      name = entry.partial;
+      const partialParts = entry.partial.split(':');
+      filename = `${partialParts[0]}s/${partialParts[1]}${/\.json$/.test(name) ? '' : '.liquid'}`;
     }
+
     return {
-      name: `${entry.partial}`,
+      name,
+      filename,
       value: entry.total_time,
       children: formatLiquidProfileData(entry.children),
       code: entry.code,
@@ -72,6 +88,7 @@ function cleanProfileData(profileData: ProfileData) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,
+    filename: null,
     code: '-',
     line: '-',
     children: formatLiquidProfileData(profileData.children),
