@@ -70,7 +70,9 @@ function formatLiquidProfileData(
     } else {
       name = entry.partial;
       const partialParts = entry.partial.split(':');
-      filename = `${partialParts[0]}s/${partialParts[1]}${/\.json$/.test(name) ? '' : '.liquid'}`;
+      filename = `${partialParts[0]}s/${partialParts[1]}${
+        /\.json$/.test(name) ? '' : '.liquid'
+      }`;
     }
 
     return {

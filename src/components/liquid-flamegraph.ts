@@ -105,7 +105,9 @@ export default class LiquidFlamegraph {
     const url = this.url;
     const hostname = url.hostname;
     const themeId = await getThemeId();
-    const link = `https://${hostname}/admin/themes/${themeId}?key=${fileName}${lineNumber ? `&line=${lineNumber}` : ''}`;
+    const link = `https://${hostname}/admin/themes/${themeId}?key=${fileName}${
+      lineNumber ? `&line=${lineNumber}` : ''
+    }`;
     return link;
   }
 
