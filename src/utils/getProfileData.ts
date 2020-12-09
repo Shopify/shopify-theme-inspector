@@ -62,7 +62,7 @@ function formatLiquidProfileData(
       name = `snippet:${entry.partial}`;
       filename = `snippets/${entry.partial}.liquid`;
     } else if (/shopify:\/\/apps/.test(entry.partial)) {
-      name = `app-${nameParts[4].slice(0, -1)}:${nameParts[3]}`;
+      name = `app-${nameParts[4].slice(0, -1)}:${nameParts[5]}:${nameParts[3]}`;
       entry.code = entry.code || entry.partial;
     } else if (nameParts[0] === 'sections') {
       name = `section:${nameParts[1].replace(/\.liquid$/, '')}`;
