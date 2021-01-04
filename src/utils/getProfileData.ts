@@ -1,18 +1,12 @@
 import nullthrows from 'nullthrows';
 import {SubjectAccessToken} from 'types';
 
-export async function getProfileData(
-  url: URL,
-  withAuthorization = true,
-): Promise<FormattedProfileData> {
+export async function getProfileData(url: URL): Promise<FormattedProfileData> {
   const parser = new DOMParser();
 
   const fetchOptions = {} as any;
-
-  if (withAuthorization) {
-    const {accessToken} = await requestAccessToken(url);
-    fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
-  }
+  const {accessToken} = await requestAccessToken(url);
+  fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
 
   url.searchParams.set('profile_liquid', 'true');
   const response = await fetch(url.href, fetchOptions);
@@ -57,27 +51,27 @@ function formatLiquidProfileData(
   return entries.map((entry: ProfileNode) => {
     const nameParts = entry.partial.split('/');
     let name = '';
-    let filename = null;
+    let filepath = null;
     if (nameParts.length === 1 && !entry.partial.includes(':')) {
       name = `snippet:${entry.partial}`;
-      filename = `snippets/${entry.partial}.liquid`;
+      filepath = `snippets/${entry.partial}.liquid`;
     } else if (/shopify:\/\/apps/.test(entry.partial)) {
       name = `app-${nameParts[4].slice(0, -1)}:${nameParts[5]}:${nameParts[3]}`;
       entry.code = entry.code || entry.partial;
     } else if (nameParts[0] === 'sections') {
       name = `section:${nameParts[1].replace(/\.liquid$/, '')}`;
-      filename = entry.partial;
+      filepath = entry.partial;
     } else {
       name = entry.partial;
       const partialParts = entry.partial.split(':');
-      filename = `${partialParts[0]}s/${partialParts[1]}${
+      filepath = `${partialParts[0]}s/${partialParts[1]}${
         /\.json$/.test(name) ? '' : '.liquid'
       }`;
     }
 
     return {
       name,
-      filename,
+      filepath,
       value: entry.total_time,
       children: formatLiquidProfileData(entry.children),
       code: entry.code,
@@ -90,7 +84,7 @@ function cleanProfileData(profileData: ProfileData) {
   const cleanData = {
     name: profileData.name,
     value: profileData.value,
-    filename: null,
+    filepath: null,
     code: '-',
     line: '-',
     children: formatLiquidProfileData(profileData.children),

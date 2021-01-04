@@ -15,7 +15,7 @@ interface ProfileNode {
 
 interface FormattedProfileNode {
   name: string;
-  filename: string | null;
+  filepath: string | null;
   value: string;
   children: FormattedProfileNode[];
   code: string | null;
@@ -24,7 +24,7 @@ interface FormattedProfileNode {
 
 interface FormattedProfileData {
   name: string;
-  filename: string | null;
+  filepath: string | null;
   value: number;
   children: FormattedProfileNode[];
   code: string;

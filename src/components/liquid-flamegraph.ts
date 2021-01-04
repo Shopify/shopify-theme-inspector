@@ -78,9 +78,9 @@ export default class LiquidFlamegraph {
     const codeLink = document.querySelector(selectors.codeAnchor);
     const codeNoLink = document.querySelector(selectors.codeNoAnchor);
 
-    if (node.data.filename) {
+    if (node.data.filepath) {
       const clickableLink = await this.generateClickableLink(
-        node.data.filename,
+        node.data.filepath,
         node.data.line,
       );
       code!.querySelector('a')!.href = clickableLink;
@@ -92,20 +92,20 @@ export default class LiquidFlamegraph {
       codeNoLink?.classList.remove('hide');
     }
     code!.querySelectorAll('.code-snippet').forEach(function(el) {
-      el.textContent = node.data.code || node.data.filename;
+      el.textContent = node.data.code || node.data.filepath;
     });
 
     updateInfoText(selectors.line, `${node.data.line}`);
   }
 
   async generateClickableLink(
-    fileName: string,
+    filepath: string,
     lineNumber: number,
   ): Promise<any> {
     const url = this.url;
     const hostname = url.hostname;
     const themeId = await getThemeId();
-    const link = `https://${hostname}/admin/themes/${themeId}?key=${fileName}${
+    const link = `https://${hostname}/admin/themes/${themeId}?key=${filepath}${
       lineNumber ? `&line=${lineNumber}` : ''
     }`;
     return link;
