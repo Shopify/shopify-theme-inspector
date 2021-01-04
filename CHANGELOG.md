@@ -1,5 +1,7 @@
 # Change Log
 
+## v2.0.0
+* [#77](https://github.com/Shopify/shopify-theme-inspector/pull/77) Update data format with change update
 
 ## v1.1.0 (Oct 2, 2020)
 * [#63](https://github.com/Shopify/shopify-theme-inspector/pull/63) Add storefront-renderer support

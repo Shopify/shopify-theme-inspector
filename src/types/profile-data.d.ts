@@ -9,23 +9,22 @@ interface ProfileNode {
   code: string;
   partial: string;
   line_number: number;
-  start_time: string;
-  end_time: string;
-  self_time: string;
   total_time: string;
   children: ProfileNode[];
 }
 
 interface FormattedProfileNode {
   name: string;
+  filepath: string | null;
   value: string;
   children: FormattedProfileNode[];
-  code: string;
+  code: string | null;
   line: number;
 }
 
 interface FormattedProfileData {
   name: string;
+  filepath: string | null;
   value: number;
   children: FormattedProfileNode[];
   code: string;

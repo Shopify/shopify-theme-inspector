@@ -13,6 +13,8 @@ const selectors = {
   partial: '[data-partial]',
   nodeTime: '[data-node-time]',
   code: '[data-code]',
+  codeAnchor: '[data-code-anchor]',
+  codeNoAnchor: '[data-code-no-anchor]',
   line: '[data-line]',
 };
 
@@ -72,27 +74,40 @@ export default class LiquidFlamegraph {
     updateInfoText(selectors.partial, node.data.name);
     updateInfoText(selectors.nodeTime, `${formatNodeTime(node.value)}ms`);
 
-    const clickableLink = await this.generateClickableLink(
-      node.data.name,
-      node.data.line,
-    );
+    const code = document.querySelector(selectors.code);
+    const codeLink = document.querySelector(selectors.codeAnchor);
+    const codeNoLink = document.querySelector(selectors.codeNoAnchor);
 
-    const codeLink = document.querySelector(selectors.code);
-    codeLink!.querySelector('a')!.href = clickableLink;
-    codeLink!.querySelector('.code-snippet')!.textContent = node.data.code;
+    if (node.data.filepath) {
+      const clickableLink = await this.generateClickableLink(
+        node.data.filepath,
+        node.data.line,
+      );
+      code!.querySelector('a')!.href = clickableLink;
+
+      codeNoLink?.classList.add('hide');
+      codeLink?.classList.remove('hide');
+    } else {
+      codeLink?.classList.add('hide');
+      codeNoLink?.classList.remove('hide');
+    }
+    code!.querySelectorAll('.code-snippet').forEach(function(el) {
+      el.textContent = node.data.code || node.data.filepath;
+    });
 
     updateInfoText(selectors.line, `${node.data.line}`);
   }
 
   async generateClickableLink(
-    fileName: string,
+    filepath: string,
     lineNumber: number,
   ): Promise<any> {
     const url = this.url;
     const hostname = url.hostname;
     const themeId = await getThemeId();
-    const fileDetails = fileName.split(':');
-    const link = `https://${hostname}/admin/themes/${themeId}?key=${fileDetails[0]}s/${fileDetails[1]}.liquid&line=${lineNumber}`;
+    const link = `https://${hostname}/admin/themes/${themeId}?key=${filepath}${
+      lineNumber ? `&line=${lineNumber}` : ''
+    }`;
     return link;
   }
 
