@@ -31,8 +31,13 @@ function noProfileFound(document: HTMLDocument) {
   return document.querySelector('#liquidProfileData') === null;
 }
 
-function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
-  return new Promise((resolve, reject) => {
+async function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
+  let executeScript = chrome.tabs.executeScript({
+    file: "/detectShopify.js"
+  })
+
+  await Promise.resolve(executeScript);
+  return await new Promise((resolve, reject) => {
     return chrome.runtime.sendMessage(
       {type: 'request-core-access-token', origin},
       ({token, error}) => {
@@ -40,7 +45,7 @@ function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
           return reject(error);
         }
         return resolve(token);
-      },
+      }
     );
   });
 }
