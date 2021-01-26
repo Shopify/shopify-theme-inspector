@@ -1,7 +1,10 @@
 import nullthrows from 'nullthrows';
 import {SubjectAccessToken} from 'types';
 
-export async function getProfileData(url: URL, isCore: boolean): Promise<FormattedProfileData> {
+export async function getProfileData(
+  url: URL,
+  isCore: boolean,
+): Promise<FormattedProfileData> {
   const parser = new DOMParser();
 
   const fetchOptions = {} as any;
@@ -31,7 +34,10 @@ function noProfileFound(document: HTMLDocument) {
   return document.querySelector('#liquidProfileData') === null;
 }
 
-function requestAccessToken({origin}: URL, isCore: boolean): Promise<SubjectAccessToken> {
+function requestAccessToken(
+  {origin}: URL,
+  isCore: boolean,
+): Promise<SubjectAccessToken> {
   return new Promise((resolve, reject) => {
     return chrome.runtime.sendMessage(
       {type: 'request-core-access-token', origin, isCore},

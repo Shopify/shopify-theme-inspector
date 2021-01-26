@@ -114,43 +114,45 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 
 // Listen for 'request-core-access-token' event and respond to the messenger
 // with a valid access token. This may trigger a login popup window if needed.
-chrome.runtime.onMessage.addListener(({type, origin, isCore}, _, sendResponse) => {
-  if (type !== 'request-core-access-token') {
-    return false;
-  }
+chrome.runtime.onMessage.addListener(
+  ({type, origin, isCore}, _, sendResponse) => {
+    if (type !== 'request-core-access-token') {
+      return false;
+    }
 
-  renderBackend = isCore
-    ? RenderBackend.Core
-    : RenderBackend.StorefrontRenderer;
+    renderBackend = isCore
+      ? RenderBackend.Core
+      : RenderBackend.StorefrontRenderer;
 
-  const params = [
-    [
-      'scope',
-      `${shopifyEmployee === true ? 'employee' : ''} ${
-        env.DEVTOOLS_SCOPE[renderBackend]
-      } ${COLLABORATORS_SCOPE}`,
-    ],
-  ];
+    const params = [
+      [
+        'scope',
+        `${shopifyEmployee === true ? 'employee' : ''} ${
+          env.DEVTOOLS_SCOPE[renderBackend]
+        } ${COLLABORATORS_SCOPE}`,
+      ],
+    ];
 
-  // SFR does not need a destination.
-  const destination =
-    renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
+    // SFR does not need a destination.
+    const destination =
+      renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
 
-  const oauth = getOauth2Client(origin);
+    const oauth = getOauth2Client(origin);
 
-  getSubjectId(oauth, origin)
-    .then(subjectId => {
-      return oauth.getSubjectAccessToken(destination, subjectId, params);
-    })
-    .then(token => {
-      sendResponse({token});
-    })
-    .catch(error => {
-      sendResponse({error});
-    });
+    getSubjectId(oauth, origin)
+      .then(subjectId => {
+        return oauth.getSubjectAccessToken(destination, subjectId, params);
+      })
+      .then(token => {
+        sendResponse({token});
+      })
+      .catch(error => {
+        sendResponse({error});
+      });
 
-  return true;
-});
+    return true;
+  },
+);
 
 // Listen for the 'request-user-info' event and respond to the messenger
 // with a the given_name of the currently logged in user.

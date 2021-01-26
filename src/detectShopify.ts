@@ -11,7 +11,7 @@ for (let i = 0; i < scripts.length; i++) {
   if (typeof content === 'string') {
     if (/Shopify\.shop\s*=/.test(content)) {
       hasDetectedShopify = true;
-      break
+      break;
     }
   }
 }

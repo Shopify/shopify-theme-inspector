@@ -112,11 +112,11 @@ function determineRenderBackend(): Promise<boolean> {
       }
       determineRenderBackend()
       `,
-      function (isCore: boolean) {
-        resolve(isCore)
-      }
-    )
-  })
+      function(isCore: boolean) {
+        resolve(isCore);
+      },
+    );
+  });
 }
 
 async function refreshPanel() {
