@@ -1,5 +1,8 @@
 # Change Log
 
+## v2.0.1 (Jan 26, 2021)
+* [#83](https://github.com/Shopify/shopify-theme-inspector/pull/83) Fix profiling error due to incorrect detection of render backend
+
 ## v2.0.0 (Jan 4, 2021)
 * [#77](https://github.com/Shopify/shopify-theme-inspector/pull/77) Update data format with change update
 

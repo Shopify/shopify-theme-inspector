@@ -89,9 +89,6 @@ chrome.runtime.onMessage.addListener((event, sender) => {
 chrome.runtime.onMessage.addListener((event, sender) => {
   if (sender.tab && sender.tab.id && event.type === 'detect-shopify') {
     setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
-    renderBackend = event.isCore
-      ? RenderBackend.Core
-      : RenderBackend.StorefrontRenderer;
   }
 });
 
@@ -117,39 +114,45 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 
 // Listen for 'request-core-access-token' event and respond to the messenger
 // with a valid access token. This may trigger a login popup window if needed.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'request-core-access-token') {
-    return false;
-  }
+chrome.runtime.onMessage.addListener(
+  ({type, origin, isCore}, _, sendResponse) => {
+    if (type !== 'request-core-access-token') {
+      return false;
+    }
 
-  const params = [
-    [
-      'scope',
-      `${shopifyEmployee === true ? 'employee' : ''} ${
-        env.DEVTOOLS_SCOPE[renderBackend]
-      } ${COLLABORATORS_SCOPE}`,
-    ],
-  ];
+    renderBackend = isCore
+      ? RenderBackend.Core
+      : RenderBackend.StorefrontRenderer;
 
-  // SFR does not need a destination.
-  const destination =
-    renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
+    const params = [
+      [
+        'scope',
+        `${shopifyEmployee === true ? 'employee' : ''} ${
+          env.DEVTOOLS_SCOPE[renderBackend]
+        } ${COLLABORATORS_SCOPE}`,
+      ],
+    ];
 
-  const oauth = getOauth2Client(origin);
+    // SFR does not need a destination.
+    const destination =
+      renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
 
-  getSubjectId(oauth, origin)
-    .then(subjectId => {
-      return oauth.getSubjectAccessToken(destination, subjectId, params);
-    })
-    .then(token => {
-      sendResponse({token});
-    })
-    .catch(error => {
-      sendResponse({error});
-    });
+    const oauth = getOauth2Client(origin);
 
-  return true;
-});
+    getSubjectId(oauth, origin)
+      .then(subjectId => {
+        return oauth.getSubjectAccessToken(destination, subjectId, params);
+      })
+      .then(token => {
+        sendResponse({token});
+      })
+      .catch(error => {
+        sendResponse({error});
+      });
+
+    return true;
+  },
+);
 
 // Listen for the 'request-user-info' event and respond to the messenger
 // with a the given_name of the currently logged in user.
@@ -182,15 +185,6 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     .catch(error => {
       sendResponse({error});
     });
-
-  return true;
-});
-
-chrome.runtime.onMessage.addListener(({type}, _, sendResponse) => {
-  if (type !== 'request-rendering-backend') return false;
-
-  const name = renderBackend.toString();
-  sendResponse({name});
 
   return true;
 });

@@ -1,4 +1,5 @@
 import {escape} from 'lodash';
+import {RenderBackend} from './env';
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';
 import {
@@ -91,15 +92,28 @@ function getInspectedWindowURL(): Promise<URL> {
   });
 }
 
-function getRenderingBackend(): Promise<string> {
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(
-      {type: 'request-rendering-backend'},
-      ({name, error}) => {
-        if (error) {
-          return reject(error);
+function determineRenderBackend(): Promise<boolean> {
+  return new Promise(resolve => {
+    chrome.devtools.inspectedWindow.eval(
+      `
+      function determineRenderBackend() {
+        const scripts = document.querySelectorAll('script');
+        let isCore = false;
+        for (let i = 0; i < scripts.length; i++) {
+          const content = scripts[i].textContent;
+          if (typeof content === 'string') {
+            if (/BOOMR\\.application\\s*=\\s*"core"/.test(content)) {
+              isCore = true;
+              break;
+            }
+          }
         }
-        return resolve(name);
+        return isCore
+      }
+      determineRenderBackend()
+      `,
+      function(isCore: boolean) {
+        resolve(isCore);
       },
     );
   });
@@ -115,17 +129,20 @@ async function refreshPanel() {
 
   let profile: FormattedProfileData;
   const url = await getInspectedWindowURL();
+  const isCore = await determineRenderBackend();
+
+  const renderingBackend = isCore
+    ? RenderBackend.Core
+    : RenderBackend.StorefrontRenderer;
 
   try {
-    profile = await getProfileData(url);
+    profile = await getProfileData(url, isCore);
 
     liquidFlamegraph = new LiquidFlamegraph(
       document.querySelector(selectors.flamegraphContainer),
       profile,
       url,
     );
-
-    const renderingBackend = await getRenderingBackend();
 
     // All events happening here are synchronous. The set timeout is for UI
     // purposes so that timing information gets displayed after the flamegraph is shown.
