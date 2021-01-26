@@ -89,9 +89,6 @@ chrome.runtime.onMessage.addListener((event, sender) => {
 chrome.runtime.onMessage.addListener((event, sender) => {
   if (sender.tab && sender.tab.id && event.type === 'detect-shopify') {
     setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
-    renderBackend = event.isCore
-      ? RenderBackend.Core
-      : RenderBackend.StorefrontRenderer;
   }
 });
 
@@ -117,10 +114,14 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
 
 // Listen for 'request-core-access-token' event and respond to the messenger
 // with a valid access token. This may trigger a login popup window if needed.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
+chrome.runtime.onMessage.addListener(({type, origin, isCore}, _, sendResponse) => {
   if (type !== 'request-core-access-token') {
     return false;
   }
+
+  renderBackend = isCore
+    ? RenderBackend.Core
+    : RenderBackend.StorefrontRenderer;
 
   const params = [
     [
@@ -130,6 +131,7 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
       } ${COLLABORATORS_SCOPE}`,
     ],
   ];
+
 
   // SFR does not need a destination.
   const destination =
@@ -182,15 +184,6 @@ chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
     .catch(error => {
       sendResponse({error});
     });
-
-  return true;
-});
-
-chrome.runtime.onMessage.addListener(({type}, _, sendResponse) => {
-  if (type !== 'request-rendering-backend') return false;
-
-  const name = renderBackend.toString();
-  sendResponse({name});
 
   return true;
 });

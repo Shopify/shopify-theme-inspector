@@ -1,11 +1,11 @@
 import nullthrows from 'nullthrows';
 import {SubjectAccessToken} from 'types';
 
-export async function getProfileData(url: URL): Promise<FormattedProfileData> {
+export async function getProfileData(url: URL, isCore: boolean): Promise<FormattedProfileData> {
   const parser = new DOMParser();
 
   const fetchOptions = {} as any;
-  const {accessToken} = await requestAccessToken(url);
+  const {accessToken} = await requestAccessToken(url, isCore);
   fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
 
   url.searchParams.set('profile_liquid', 'true');
@@ -31,10 +31,10 @@ function noProfileFound(document: HTMLDocument) {
   return document.querySelector('#liquidProfileData') === null;
 }
 
-function requestAccessToken({origin}: URL): Promise<SubjectAccessToken> {
+function requestAccessToken({origin}: URL, isCore: boolean): Promise<SubjectAccessToken> {
   return new Promise((resolve, reject) => {
     return chrome.runtime.sendMessage(
-      {type: 'request-core-access-token', origin},
+      {type: 'request-core-access-token', origin, isCore},
       ({token, error}) => {
         if (error) {
           return reject(error);
