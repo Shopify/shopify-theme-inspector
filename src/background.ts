@@ -132,7 +132,6 @@ chrome.runtime.onMessage.addListener(({type, origin, isCore}, _, sendResponse) =
     ],
   ];
 
-
   // SFR does not need a destination.
   const destination =
     renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
