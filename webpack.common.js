@@ -58,6 +58,7 @@ module.exports = {
       template: 'src/popupNotShopifyStore.html',
       chunks: ['popup'],
     }),
+    new HtmlWebpackInlineSVGPlugin(),
     new CopyPlugin({
       patterns: [{
         from: 'src/manifest.json',
