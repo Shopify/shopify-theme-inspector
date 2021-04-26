@@ -1,6 +1,6 @@
 # Change Log
 
-## v2.0.2
+## v2.0.2 (Apr. 26, 2021)
 * [#87](https://github.com/Shopify/shopify-theme-inspector/pull/87) Security update packages
 
 ## v2.0.1 (Jan 26, 2021)
