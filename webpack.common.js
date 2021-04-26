@@ -6,6 +6,14 @@ const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js'],
+    fallback: {
+      "stream": require.resolve("stream-browserify"),
+      "crypto": require.resolve('crypto-browserify'),
+      "buffer": require.resolve("buffer/")
+    }
+  },
   entry: {
     background: './src/background.ts',
     popup: './src/popup.ts',
@@ -51,14 +59,17 @@ module.exports = {
       chunks: ['popup'],
     }),
     new HtmlWebpackInlineSVGPlugin(),
-    new CopyPlugin(
-      [{from: 'src/manifest.json'}, {from: 'src/images', to: 'images'}],
-      {copyUnmodified: true},
-    ),
+    new CopyPlugin({
+      patterns: [{
+        from: 'src/manifest.json',
+        force: true
+      }, {
+        from: 'src/images',
+        to: 'images',
+        force: true
+      }],
+    }),
   ],
-  resolve: {
-    extensions: ['.tsx', '.ts', '.js'],
-  },
   output: {
     filename: '[name].js',
     path: path.resolve(__dirname, 'dist'),

@@ -2,7 +2,7 @@ shared:
   node_container: &node_container
     language: node_js
     node_js:
-      - 10.16.3
+      - 14.16.1
     services:
       - xvfb
     before_install:
