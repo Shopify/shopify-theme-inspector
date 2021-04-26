@@ -12,7 +12,7 @@
     "zip": "yarn build && cd dist && zip -r -X ../shopify_devtools.zip ."
   },
   "engines": {
-    "node": ">=10.16.3"
+    "node": ">=14.16.1"
   },
   "repository": {
     "type": "git",
