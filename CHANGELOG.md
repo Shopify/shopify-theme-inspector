@@ -1,5 +1,8 @@
 # Change Log
 
+## v2.0.3 (Apr. 29, 2021)
+* [#93](https://github.com/Shopify/shopify-theme-inspector/pull/93) Fix extension due to broken minification
+
 ## v2.0.2 (Apr. 26, 2021)
 * [#87](https://github.com/Shopify/shopify-theme-inspector/pull/87) Security update packages
 
