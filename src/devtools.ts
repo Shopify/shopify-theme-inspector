@@ -1,4 +1,4 @@
-import {escape} from 'lodash';
+import escape from 'lodash.escape';
 import {RenderBackend} from './env';
 import Toolbar from './components/toolbar';
 import LiquidFlamegraph from './components/liquid-flamegraph';

@@ -1,7 +1,8 @@
 import * as d3 from 'd3';
 import * as flamegraph from 'd3-flame-graph';
 import 'd3-flame-graph/dist/d3-flamegraph.css';
-import {debounce, escape} from 'lodash';
+import debounce from 'lodash.debounce';
+import escape from 'lodash.escape';
 import {
   formatNodeTime,
   getThemeId,
