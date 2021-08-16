@@ -1,5 +1,8 @@
 # Change Log
 
+## v2.0.4 (Aug. 16, 2021)
+* Package dependency updates
+
 ## v2.0.3 (Apr. 29, 2021)
 * [#93](https://github.com/Shopify/shopify-theme-inspector/pull/93) Fix extension due to broken minification
 
