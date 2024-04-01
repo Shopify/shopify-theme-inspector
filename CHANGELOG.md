@@ -1,5 +1,8 @@
 # Change Log
 
+## v2.0.5 (Apr. 1, 2024)
+* [#136](https://github.com/Shopify/shopify-theme-inspector/pull/136) Fix profiling for stores with custom domains 
+
 ## v2.0.4 (Aug. 16, 2021)
 * Package dependency updates
 
