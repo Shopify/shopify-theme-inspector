@@ -3,7 +3,8 @@ const IS_CHROME = navigator.userAgent.indexOf('Firefox') < 0;
 export function isDev(origin: string): boolean {
   return (
     origin.includes('shop1.myshopify') ||
-    origin.includes('shop1-fast.myshopify')
+    origin.includes('shop1-fast.myshopify') ||
+    origin.includes('us.spin.dev')
   );
 }
 

@@ -67,6 +67,9 @@ function formatLiquidProfileData(
     } else if (nameParts[0] === 'sections') {
       name = `section:${nameParts[1].replace(/\.liquid$/, '')}`;
       filepath = entry.partial;
+    } else if (nameParts[0] === 'snippets') {
+      name = `snippet:${nameParts[1]}`;
+      filepath = `${entry.partial}.liquid`;
     } else {
       name = entry.partial;
       const partialParts = entry.partial.split(':');
