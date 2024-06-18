@@ -34,7 +34,7 @@
     "crypto-browserify": "^3.12.0",
     "d3": "^5.16.0",
     "d3-flame-graph": "^2.2.2",
-    "jsdom": "^15.2.1",
+    "jsdom": "^16.5.0",
     "lodash.debounce": "^4.0.8",
     "lodash.escape": "^4.0.1",
     "nullthrows": "^1.1.1",
