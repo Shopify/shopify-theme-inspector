@@ -1,5 +1,8 @@
 # Change Log
 
+## v2.0.7 (June 6, 2024)
+* [#143](https://github.com/Shopify/shopify-theme-inspector/pull/149) Ignore empty partials coming from dynamic sources
+
 ## v2.0.6 (June 6, 2024)
 * [#143](https://github.com/Shopify/shopify-theme-inspector/pull/143) Fix redirects for snippets
 
