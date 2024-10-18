@@ -54,7 +54,11 @@ function requestAccessToken(
 function formatLiquidProfileData(
   entries: ProfileNode[],
 ): FormattedProfileNode[] {
-  return entries.map((entry: ProfileNode) => {
+  return entries.reduce((formattedEntries: FormattedProfileNode[], entry: ProfileNode) => {
+    if (!entry.partial) {
+      return formattedEntries;
+    }
+
     const nameParts = entry.partial.split('/');
     let name = '';
     let filepath = null;
@@ -78,15 +82,17 @@ function formatLiquidProfileData(
       }`;
     }
 
-    return {
+    formattedEntries.push({
       name,
       filepath,
       value: entry.total_time,
       children: formatLiquidProfileData(entry.children),
       code: entry.code,
       line: entry.line_number,
-    };
-  });
+    });
+
+    return formattedEntries;
+  }, []);
 }
 
 function cleanProfileData(profileData: ProfileData) {
