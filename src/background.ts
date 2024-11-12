@@ -3,8 +3,16 @@ import {isDev, Oauth2} from './utils';
 
 const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
+
+// Add persistent state management since service workers can be terminated
 let shopifyEmployee = false;
 let renderBackend = RenderBackend.StorefrontRenderer;
+
+// Store state in chrome.storage for persistence
+chrome.storage.local.get(['shopifyEmployee', 'renderBackend'], (result) => {
+  shopifyEmployee = result.shopifyEmployee || false;
+  renderBackend = result.renderBackend || RenderBackend.StorefrontRenderer;
+});
 
 function getOauth2Client(origin: string) {
   const identityDomain = isDev(origin)
@@ -27,11 +35,10 @@ function getOauth2Client(origin: string) {
   });
 }
 
-// Change icon from colored to greyscale depending on whether or not Shopify has
-// been detected
+// Update icon setting function to use chrome.action instead of chrome.pageAction
 function setIconAndPopup(active: string, tabId: number) {
   const iconType = active ? 'shopify' : 'shopify-dimmed';
-  chrome.pageAction.setIcon({
+  chrome.action.setIcon({
     tabId,
     path: {
       '16': `images/16-${iconType}.png`,
@@ -42,9 +49,8 @@ function setIconAndPopup(active: string, tabId: number) {
   });
 
   if (active) {
-    chrome.pageAction.setPopup({tabId, popup: './popupAuthFlow.html'});
+    chrome.action.setPopup({tabId, popup: './popupAuthFlow.html'});
   }
-  chrome.pageAction.show(tabId);
 }
 
 function getSubjectId(oauth: Oauth2, origin: string) {
@@ -54,137 +60,123 @@ function getSubjectId(oauth: Oauth2, origin: string) {
   return Promise.resolve(env.OAUTH2_SUBJECT_ID[renderBackend]);
 }
 
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'signOut') return false;
-
-  getOauth2Client(origin)
-    .logoutUser()
-    .then(() => {
-      sendResponse();
-    })
-    .catch(({message}) => {
-      sendResponse({error: message});
-    });
-
-  return true;
-});
-
-// Create a listener which handles when detectShopify.js, which executes in the
-// the same context as a tab, sends the results of of whether or not a Shopify
-// employee was detected
-chrome.runtime.onMessage.addListener((event, sender) => {
-  if (
-    sender.tab &&
-    sender.tab.id &&
-    event.type === 'detect-shopify-employee' &&
-    event.hasDetectedShopifyEmployee === true
-  ) {
-    shopifyEmployee = true;
+// Helper functions to handle async operations
+async function handleSignOut(origin: string, sendResponse: Function) {
+  try {
+    await getOauth2Client(origin).logoutUser();
+    sendResponse();
+  } catch (error) {
+    sendResponse({ error: error.message });
   }
-});
+}
 
-// Create a listener which handles when detectShopify.js, which executes in the
-// the same context as a tab, sends the results of of whether or not Shopify was
-// detected
-chrome.runtime.onMessage.addListener((event, sender) => {
-  if (sender.tab && sender.tab.id && event.type === 'detect-shopify') {
-    setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
+async function handleAuthentication(origin: string, sendResponse: Function) {
+  try {
+    await getOauth2Client(origin).authenticate();
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('Authentication Error:', error.message);
+    sendResponse({ success: false, error });
   }
-});
+}
 
-// Create a listener which handles when the Sign In button is click from the popup
-// or DevTools panel.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'authenticate') {
-    return false;
+async function handleCoreAccessToken(message: any, sendResponse: Function) {
+  const { origin, isCore } = message;
+
+  renderBackend = isCore ? RenderBackend.Core : RenderBackend.StorefrontRenderer;
+  chrome.storage.local.set({ renderBackend });
+
+  const params = [
+    [
+      'scope',
+      `${shopifyEmployee === true ? 'employee' : ''} ${
+        env.DEVTOOLS_SCOPE[renderBackend]
+      } ${COLLABORATORS_SCOPE}`,
+    ],
+  ];
+
+  const destination =
+    renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
+
+  const oauth = getOauth2Client(origin);
+
+  try {
+    const subjectId = await getSubjectId(oauth, origin);
+    const token = await oauth.getSubjectAccessToken(
+      destination,
+      subjectId,
+      params
+    );
+    sendResponse({ token });
+  } catch (error) {
+    sendResponse({ error });
   }
+}
 
-  getOauth2Client(origin)
-    .authenticate()
-    .then(() => {
-      sendResponse({success: true});
-    })
-    .catch(error => {
-      console.log('Authentication Error:', error.message);
-      sendResponse({success: false, error});
-    });
+async function handleUserName(origin: string, sendResponse: Function) {
+  try {
+    const userInfo = await getOauth2Client(origin).getUserInfo();
+    sendResponse({ name: userInfo.given_name });
+  } catch (error) {
+    sendResponse({ error });
+  }
+}
 
-  return true;
-});
+async function handleAuthStatus(origin: string, sendResponse: Function) {
+  try {
+    const isLoggedIn = await getOauth2Client(origin).hasValidClientToken();
+    sendResponse({ isLoggedIn });
+  } catch (error) {
+    sendResponse({ error });
+  }
+}
 
-// Listen for 'request-core-access-token' event and respond to the messenger
-// with a valid access token. This may trigger a login popup window if needed.
-chrome.runtime.onMessage.addListener(
-  ({type, origin, isCore}, _, sendResponse) => {
-    if (type !== 'request-core-access-token') {
-      return false;
-    }
-
-    renderBackend = isCore
-      ? RenderBackend.Core
-      : RenderBackend.StorefrontRenderer;
-
-    const params = [
-      [
-        'scope',
-        `${shopifyEmployee === true ? 'employee' : ''} ${
-          env.DEVTOOLS_SCOPE[renderBackend]
-        } ${COLLABORATORS_SCOPE}`,
-      ],
-    ];
-
-    // SFR does not need a destination.
-    const destination =
-      renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
-
-    const oauth = getOauth2Client(origin);
-
-    getSubjectId(oauth, origin)
-      .then(subjectId => {
-        return oauth.getSubjectAccessToken(destination, subjectId, params);
-      })
-      .then(token => {
-        sendResponse({token});
-      })
-      .catch(error => {
-        sendResponse({error});
-      });
-
+// Update message listeners to use async/await pattern
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.type === 'signOut') {
+    handleSignOut(message.origin, sendResponse);
     return true;
-  },
-);
+  }
 
-// Listen for the 'request-user-info' event and respond to the messenger
-// with a the given_name of the currently logged in user.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'request-user-name') return false;
+  if (message.type === 'detect-shopify-employee' &&
+      sender.tab?.id &&
+      message.hasDetectedShopifyEmployee === true) {
+    shopifyEmployee = true;
+    chrome.storage.local.set({ shopifyEmployee: true });
+  }
 
-  getOauth2Client(origin)
-    .getUserInfo()
-    .then(userInfo => {
-      const name = userInfo.given_name;
-      sendResponse({name});
-    })
-    .catch(error => {
-      sendResponse({error});
-    });
+  if (message.type === 'detect-shopify' && sender.tab?.id) {
+    setIconAndPopup(message.hasDetectedShopify, sender.tab.id);
+  }
 
-  return true;
+  if (message.type === 'authenticate') {
+    handleAuthentication(message.origin, sendResponse);
+    return true;
+  }
+
+  if (message.type === 'request-core-access-token') {
+    handleCoreAccessToken(message, sendResponse);
+    return true;
+  }
+
+  if (message.type === 'request-user-name') {
+    handleUserName(message.origin, sendResponse);
+    return true;
+  }
+
+  if (message.type === 'request-auth-status') {
+    handleAuthStatus(message.origin, sendResponse);
+    return true;
+  }
+
+  return false;
 });
 
-// Listen for the 'request-auth-status' event and respond to the messenger
-// with a boolean of user login status.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'request-auth-status') return false;
-
-  getOauth2Client(origin)
-    .hasValidClientToken()
-    .then(isLoggedIn => {
-      sendResponse({isLoggedIn});
-    })
-    .catch(error => {
-      sendResponse({error});
-    });
-
-  return true;
+// Add service worker activation listener
+chrome.runtime.onInstalled.addListener(() => {
+  // Initialize extension state
+  chrome.storage.local.set({
+    shopifyEmployee: false,
+    renderBackend: RenderBackend.StorefrontRenderer,
+  });
 });
