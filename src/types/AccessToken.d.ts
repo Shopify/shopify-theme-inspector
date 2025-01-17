@@ -1,4 +1,3 @@
-/* eslint-disable babel/camelcase */
 export interface ClientTokenResponseBody {
   access_token: string;
   expires_in: number;

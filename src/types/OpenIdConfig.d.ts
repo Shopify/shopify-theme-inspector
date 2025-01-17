@@ -1,5 +1,3 @@
-/* eslint-disable babel/camelcase */
-
 export interface OpenIdConfig {
   issuer: string;
   authorization_endpoint: string;
