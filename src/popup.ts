@@ -1,3 +1,4 @@
+import { AuthResponse, AuthStatusResponse, UserNameResponse } from 'types/messages';
 import './styles/popup.css';
 
 const selectors = {
@@ -58,66 +59,64 @@ async function setupPopupWindow() {
 if (signInButton) {
   signInButton.addEventListener('click', async () => {
     const {origin} = await getActiveTabURL();
-    chrome.runtime.sendMessage(
-      {
-        type: 'authenticate',
-        origin,
-      },
-      payload => {
-        if (payload.success) {
+    chrome.runtime.sendMessage({
+      type: 'authenticate',
+      origin,
+      }).then((response: AuthResponse) => {
+        if (response && 'success' in response && response.success) {
           setSignedInPopup();
         }
-      },
-    );
-    signInButton.querySelector('span')?.classList.add('hide');
-    signInButton.querySelector('.loader')?.classList.remove('hide');
+        if (response && 'error' in response && response.error) {
+          console.error('Authentication error:', response.error);
+        }
+        signInButton.querySelector('span')?.classList.add('hide');
+        signInButton.querySelector('.loader')?.classList.remove('hide');
+      });
   });
 }
 
 if (signOutButton) {
   signOutButton.addEventListener('click', async () => {
     const {origin} = await getActiveTabURL();
-    chrome.runtime.sendMessage({type: 'signOut', origin}, payload => {
-      if (payload && payload.error) {
-        console.error('Logout error:', payload.error);
-      } else {
-        setSignInPopup();
-      }
-    });
-    signOutButton.querySelector('span')?.classList.add('hide');
-    signOutButton.querySelector('.loader')?.classList.remove('hide');
+    chrome.runtime.sendMessage({
+      type: 'signOut',
+      origin,
+      }).then((response: AuthResponse) => {
+        if (response?.error) {
+          console.error('Logout error:', response.error);
+        } else {
+          setSignInPopup();
+        }
+        signOutButton.querySelector('span')?.classList.add('hide');
+        signOutButton.querySelector('.loader')?.classList.remove('hide'); 
+      });
+    
   });
 }
 
-async function getUserName(): Promise<String> {
+async function getUserName(): Promise<string> {
   const {origin} = await getActiveTabURL();
-
-  return new Promise((resolve, reject) => {
-    chrome.runtime.sendMessage(
-      {type: 'request-user-name', origin},
-      ({name, error}) => {
-        if (error) {
-          return reject(error);
-        }
-        return resolve(name);
-      },
-    );
+  return chrome.runtime.sendMessage({
+    type: 'request-user-name',
+    origin,
+  }).then((response: UserNameResponse) => {
+    if (response?.error) {
+      throw new Error(response.error);
+    }
+    return response.name || '';
   });
 }
 
 async function getAuthStatus(): Promise<boolean> {
   const {origin} = await getActiveTabURL();
-
-  return new Promise(resolve => {
-    return chrome.runtime.sendMessage(
-      {type: 'request-auth-status', origin},
-      ({isLoggedIn, error}) => {
-        if (error) {
-          return resolve(false);
-        }
-        return resolve(isLoggedIn);
-      },
-    );
+  return chrome.runtime.sendMessage({
+    type: 'request-auth-status',
+    origin,
+    }).then((response: AuthStatusResponse) => {
+      if (response?.error) {
+        return false;
+    }
+    return response.isLoggedIn || false;
   });
 }
 

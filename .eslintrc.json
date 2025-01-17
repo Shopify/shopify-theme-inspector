@@ -1,7 +1,6 @@
 {
   "extends": [
     "plugin:shopify/typescript",
-    "plugin:shopify/jest",
     "plugin:shopify/node",
     "plugin:shopify/prettier"
   ],
@@ -16,18 +15,10 @@
     "jsx-a11y/control-has-associated-label": "off",
     "node/no-extraneous-require": "off",
     "import/no-cycle": "off",
-    "jest/require-tothrow-message": "off",
     "callback-return": "off",
-    "jest/no-if": "off",
     "import/named": "off",
     "func-style": "off",
     "shopify/restrict-full-import": ["error", "lodash"],
-    "shopify/jsx-no-hardcoded-content": "off",
-    "shopify/jest/no-vague-titles": [
-      "error",
-      {
-        "allow": ["all"]
-      }
-    ]
+    "shopify/jsx-no-hardcoded-content": "off"
   }
 }

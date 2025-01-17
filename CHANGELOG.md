@@ -1,5 +1,8 @@
 # Change Log
 
+## v3.0.0 (Jan. 17, 2025)
+* [#153](https://github.com/Shopify/shopify-theme-inspector/pull/153) Add support for Manifest v3 and Speedscope
+
 ## v2.0.7 (June 6, 2024)
 * [#149](https://github.com/Shopify/shopify-theme-inspector/pull/149) Ignore empty partials coming from dynamic sources
 

@@ -8,10 +8,14 @@ export function isDev(origin: string): boolean {
   );
 }
 
-export function getThemeId() {
+export function getThemeId(): Promise<string> {
   return new Promise(resolve => {
-    chrome.devtools.inspectedWindow.eval('Shopify.theme.id', (result: string) =>
-      resolve(result),
+    chrome.devtools.inspectedWindow.eval(
+      'Shopify.theme.id',
+      {useContentScriptContext: false},
+      (result: any, _: any) => {
+        resolve(result as string);
+      }
     );
   });
 }

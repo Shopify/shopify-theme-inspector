@@ -3,6 +3,7 @@
   --toolbar-border-color: rgb(204, 204, 204);
   --button-color: rgb(110,110,110);
   --text-color: rgb(40,40,40);
+  --toolbar-height: 26px;
 }
 
 [data-theme="dark"] {
@@ -15,7 +16,7 @@
 /* Toolbar */
 .toolbar {
   background-color: var(--toolbar-background-color);
-  height: 26px;
+  height: var(--toolbar-height);
   padding-top: 0;
   margin-top: 0;
   border-bottom: 1px solid var(--toolbar-border-color);
@@ -63,25 +64,12 @@
   width: 14px;
 }
 
-.toolbar__button-icon--zoom-out {
-  height: 14px;
-  width: 14px;
-}
-
 .toolbar__button-icon svg {
   position: absolute;
   width: 100%;
   height: 100%;
   top: 0;
   left: 0;
-}
-
-/* Toolbar Divider */
-.toolbar__divider {
-  width: 1px;
-  height: 16px;
-  margin: 0 5px;
-  background-color: var(--toolbar-border-color);
 }
 
 /* Toolbar Tooltip */
@@ -108,12 +96,12 @@ body {
   color: var(--text-color);
 }
 
-.hide{
-  display: none;
+html, body {
+  height: 100%;
 }
 
-.chart {
-  margin: 20px 20px;
+.hide{
+  display: none;
 }
 
 .centered-message {
@@ -189,8 +177,16 @@ body {
   opacity: 0.6;
 }
 
-/* D3 Overrides */
+iframe {
+  border: none;
+  display: block;
+  height: 100%;
+  width: 100%;
+}
 
-[data-theme="dark"] .d3-flame-graph rect {
-  stroke: var(--toolbar-border-color);
+/* When the wrapper is visible (doesn't have hide class) */
+[data-speedscope-wrapper]:not(.hide) {
+  height: calc(100vh - var(--toolbar-height));
+  width: 100%;
+  display: block;
 }

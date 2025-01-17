@@ -1,5 +1,6 @@
 import {env, RenderBackend} from './env';
 import {isDev, Oauth2} from './utils';
+import type { ChromeMessage } from './types/messages';
 
 const COLLABORATORS_SCOPE =
   'https://api.shopify.com/auth/partners.collaborator-relationships.readonly';
@@ -29,9 +30,9 @@ function getOauth2Client(origin: string) {
 
 // Change icon from colored to greyscale depending on whether or not Shopify has
 // been detected
-function setIconAndPopup(active: string, tabId: number) {
+function setIconAndPopup(active: boolean, tabId: number) {
   const iconType = active ? 'shopify' : 'shopify-dimmed';
-  chrome.pageAction.setIcon({
+  chrome.action.setIcon({
     tabId,
     path: {
       '16': `images/16-${iconType}.png`,
@@ -42,9 +43,9 @@ function setIconAndPopup(active: string, tabId: number) {
   });
 
   if (active) {
-    chrome.pageAction.setPopup({tabId, popup: './popupAuthFlow.html'});
+    chrome.action.setPopup({tabId, popup: './popupAuthFlow.html'});
   }
-  chrome.pageAction.show(tabId);
+  chrome.action.enable(tabId);
 }
 
 function getSubjectId(oauth: Oauth2, origin: string) {
@@ -54,137 +55,91 @@ function getSubjectId(oauth: Oauth2, origin: string) {
   return Promise.resolve(env.OAUTH2_SUBJECT_ID[renderBackend]);
 }
 
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'signOut') return false;
+chrome.runtime.onMessage.addListener((message: ChromeMessage, sender, sendResponse) => {
+  switch (message.type) {
+    case 'detect-shopify':
+      if (sender.tab?.id) {
+        setIconAndPopup(message.hasDetectedShopify, sender.tab.id);
+      }
+      break;
+      
+    case 'detect-shopify-employee':
+      if (message.hasDetectedShopifyEmployee) {
+        shopifyEmployee = true;
+      }
+      break;
+      
+    case 'signOut':
+      getOauth2Client(message.origin)
+        .logoutUser()
+        .then(() => {
+          sendResponse();
+        })
+        .catch(({message}) => {
+          sendResponse({error: message});
+        });
+      return true;
+      
+    case 'authenticate':
+      getOauth2Client(message.origin)
+        .authenticate()
+        .then(() => {
+          sendResponse({success: true});
+        })
+        .catch(error => {
+          console.log('Authentication Error:', error.message);
+          sendResponse({success: false, error});
+        });
+      return true;
+      
+    case 'request-core-access-token': {
+      const params = [
+        [
+          'scope',
+          `${shopifyEmployee === true ? 'employee' : ''} ${
+            env.DEVTOOLS_SCOPE[RenderBackend.StorefrontRenderer]
+          } ${COLLABORATORS_SCOPE}`,
+        ],
+      ];
 
-  getOauth2Client(origin)
-    .logoutUser()
-    .then(() => {
-      sendResponse();
-    })
-    .catch(({message}) => {
-      sendResponse({error: message});
-    });
+      const oauth = getOauth2Client(message.origin);
 
-  return true;
-});
-
-// Create a listener which handles when detectShopify.js, which executes in the
-// the same context as a tab, sends the results of of whether or not a Shopify
-// employee was detected
-chrome.runtime.onMessage.addListener((event, sender) => {
-  if (
-    sender.tab &&
-    sender.tab.id &&
-    event.type === 'detect-shopify-employee' &&
-    event.hasDetectedShopifyEmployee === true
-  ) {
-    shopifyEmployee = true;
-  }
-});
-
-// Create a listener which handles when detectShopify.js, which executes in the
-// the same context as a tab, sends the results of of whether or not Shopify was
-// detected
-chrome.runtime.onMessage.addListener((event, sender) => {
-  if (sender.tab && sender.tab.id && event.type === 'detect-shopify') {
-    setIconAndPopup(event.hasDetectedShopify, sender.tab.id);
-  }
-});
-
-// Create a listener which handles when the Sign In button is click from the popup
-// or DevTools panel.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'authenticate') {
-    return false;
-  }
-
-  getOauth2Client(origin)
-    .authenticate()
-    .then(() => {
-      sendResponse({success: true});
-    })
-    .catch(error => {
-      console.log('Authentication Error:', error.message);
-      sendResponse({success: false, error});
-    });
-
-  return true;
-});
-
-// Listen for 'request-core-access-token' event and respond to the messenger
-// with a valid access token. This may trigger a login popup window if needed.
-chrome.runtime.onMessage.addListener(
-  ({type, origin, isCore}, _, sendResponse) => {
-    if (type !== 'request-core-access-token') {
-      return false;
+      getSubjectId(oauth, message.origin)
+        .then(subjectId => {
+          return oauth.getSubjectAccessToken(subjectId, params);
+        })
+        .then(token => {
+          sendResponse({token});
+        })
+        .catch(error => {
+          sendResponse({error});
+        });
+      return true;
     }
 
-    renderBackend = isCore
-      ? RenderBackend.Core
-      : RenderBackend.StorefrontRenderer;
+    case 'request-user-name': {
+      getOauth2Client(message.origin)
+        .getUserInfo()
+        .then(userInfo => {
+          const name = userInfo.given_name;
+          sendResponse({name});
+        })
+        .catch(error => {
+          sendResponse({error});
+        });
+      return true;
+    }
 
-    const params = [
-      [
-        'scope',
-        `${shopifyEmployee === true ? 'employee' : ''} ${
-          env.DEVTOOLS_SCOPE[renderBackend]
-        } ${COLLABORATORS_SCOPE}`,
-      ],
-    ];
-
-    // SFR does not need a destination.
-    const destination =
-      renderBackend === RenderBackend.Core ? `${origin}/admin` : '';
-
-    const oauth = getOauth2Client(origin);
-
-    getSubjectId(oauth, origin)
-      .then(subjectId => {
-        return oauth.getSubjectAccessToken(destination, subjectId, params);
-      })
-      .then(token => {
-        sendResponse({token});
-      })
-      .catch(error => {
-        sendResponse({error});
-      });
-
-    return true;
-  },
-);
-
-// Listen for the 'request-user-info' event and respond to the messenger
-// with a the given_name of the currently logged in user.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'request-user-name') return false;
-
-  getOauth2Client(origin)
-    .getUserInfo()
-    .then(userInfo => {
-      const name = userInfo.given_name;
-      sendResponse({name});
-    })
-    .catch(error => {
-      sendResponse({error});
-    });
-
-  return true;
-});
-
-// Listen for the 'request-auth-status' event and respond to the messenger
-// with a boolean of user login status.
-chrome.runtime.onMessage.addListener(({type, origin}, _, sendResponse) => {
-  if (type !== 'request-auth-status') return false;
-
-  getOauth2Client(origin)
-    .hasValidClientToken()
-    .then(isLoggedIn => {
-      sendResponse({isLoggedIn});
-    })
-    .catch(error => {
-      sendResponse({error});
-    });
-
-  return true;
+    case 'request-auth-status': {
+      getOauth2Client(message.origin)
+        .hasValidClientToken()
+        .then(isLoggedIn => {
+          sendResponse({isLoggedIn});
+        })
+        .catch(error => {
+          sendResponse({error});
+        });
+      return true;
+    }
+  }
 });

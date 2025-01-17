@@ -1,108 +1,29 @@
-import nullthrows from 'nullthrows';
 import {SubjectAccessToken} from 'types';
+import { CoreAccessTokenResponse } from '../types/messages';
 
 export async function getProfileData(
-  url: URL,
-  isCore: boolean,
-): Promise<FormattedProfileData> {
-  const parser = new DOMParser();
+  url: URL): Promise<string> {
 
-  const fetchOptions = {} as any;
-  const {accessToken} = await requestAccessToken(url, isCore);
-  fetchOptions.headers = {Authorization: `Bearer ${accessToken}`};
+  const fetchOptions = {
+    headers: {
+      Accept: 'application/vnd.speedscope+json',
+      Authorization: `Bearer ${await requestAccessToken(url).then(({accessToken}) => accessToken)}`,
+    },
+  };
 
-  url.searchParams.set('profile_liquid', 'true');
-  const response = await fetch(url.href, fetchOptions);
-
-  if (!response.ok) throw Error(response.statusText);
-
-  const html = await response.text();
-  const document = parser.parseFromString(html, 'text/html');
-
-  if (noProfileFound(document)) {
-    throw Error('Liquid profile not found for this page');
-  }
-
-  const profileData = JSON.parse(
-    nullthrows(document.querySelector('#liquidProfileData')).textContent || '',
-  );
-
-  return cleanProfileData(profileData);
-}
-
-function noProfileFound(document: HTMLDocument) {
-  return document.querySelector('#liquidProfileData') === null;
+  return fetch(url.href, fetchOptions).then(response => response.text());
 }
 
 function requestAccessToken(
-  {origin}: URL,
-  isCore: boolean,
-): Promise<SubjectAccessToken> {
+  {origin}: URL): Promise<SubjectAccessToken> {
   return new Promise((resolve, reject) => {
-    return chrome.runtime.sendMessage(
-      {type: 'request-core-access-token', origin, isCore},
-      ({token, error}) => {
-        if (error) {
-          return reject(error);
-        }
-        return resolve(token);
-      },
-    );
-  });
-}
-
-function formatLiquidProfileData(
-  entries: ProfileNode[],
-): FormattedProfileNode[] {
-  return entries.reduce((formattedEntries: FormattedProfileNode[], entry: ProfileNode) => {
-    if (!entry.partial) {
-      return formattedEntries;
-    }
-
-    const nameParts = entry.partial.split('/');
-    let name = '';
-    let filepath = null;
-    if (nameParts.length === 1 && !entry.partial.includes(':')) {
-      name = `snippet:${entry.partial}`;
-      filepath = `snippets/${entry.partial}.liquid`;
-    } else if (/shopify:\/\/apps/.test(entry.partial)) {
-      name = `app-${nameParts[4].slice(0, -1)}:${nameParts[5]}:${nameParts[3]}`;
-      entry.code = entry.code || entry.partial;
-    } else if (nameParts[0] === 'sections') {
-      name = `section:${nameParts[1].replace(/\.liquid$/, '')}`;
-      filepath = entry.partial;
-    } else if (nameParts[0] === 'snippets') {
-      name = `snippet:${nameParts[1]}`;
-      filepath = `${entry.partial}.liquid`;
-    } else {
-      name = entry.partial;
-      const partialParts = entry.partial.split(':');
-      filepath = `${partialParts[0]}s/${partialParts[1]}${
-        /\.json$/.test(name) ? '' : '.liquid'
-      }`;
-    }
-
-    formattedEntries.push({
-      name,
-      filepath,
-      value: entry.total_time,
-      children: formatLiquidProfileData(entry.children),
-      code: entry.code,
-      line: entry.line_number,
+    chrome.runtime.sendMessage(
+      {type: 'request-core-access-token', origin},
+    ).then((response: CoreAccessTokenResponse) => {
+      if (response.error) {
+        return reject(response.error);
+      }
+      return resolve(response.token!);
     });
-
-    return formattedEntries;
-  }, []);
-}
-
-function cleanProfileData(profileData: ProfileData) {
-  const cleanData = {
-    name: profileData.name,
-    value: profileData.value,
-    filepath: null,
-    code: '-',
-    line: '-',
-    children: formatLiquidProfileData(profileData.children),
-  };
-  return cleanData;
+  });
 }

@@ -1,12 +1,11 @@
 {
   "name": "Shopify Theme Inspector for Chrome",
-  "version": "2.0.7",
-  "description": "Profile and debug Liquid template on your Shopify store",
+  "version": "3.0.0",
+  "description": "Profile and debug Liquid templates on your Shopify store",
   "devtools_page": "devtools.html",
   "permissions": ["storage", "identity", "activeTab"],
   "background": {
-    "scripts": ["background.js"],
-    "persistent": false
+    "service_worker": "background.js"
   },
   "icons": {
     "16": "images/16-shopify.png",
@@ -14,7 +13,7 @@
     "48": "images/48-shopify.png",
     "128": "images/128-shopify.png"
   },
-  "page_action": {
+  "action": {
     "default_popup": "popupNotShopifyStore.html",
     "default_icon": {
       "16": "images/16-shopify-dimmed.png",
@@ -23,7 +22,7 @@
       "128": "images/128-shopify-dimmed.png"
     }
   },
-  "manifest_version": 2,
+  "manifest_version": 3,
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
