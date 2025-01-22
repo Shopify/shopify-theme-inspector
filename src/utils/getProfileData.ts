@@ -2,16 +2,24 @@ import {SubjectAccessToken} from 'types';
 import { CoreAccessTokenResponse } from '../types/messages';
 
 export async function getProfileData(
-  url: URL): Promise<string> {
+  url: URL): Promise<any> {
 
-  const fetchOptions = {
-    headers: {
-      Accept: 'application/vnd.speedscope+json',
-      Authorization: `Bearer ${await requestAccessToken(url).then(({accessToken}) => accessToken)}`,
-    },
-  };
+  try {
+    const fetchOptions = {
+      headers: {
+        Accept: 'application/vnd.speedscope+json',
+        Authorization: `Bearer ${await requestAccessToken(url).then(({accessToken}) => accessToken)}`,
+      },
+    };
 
-  return fetch(url.href, fetchOptions).then(response => response.text());
+    const response = await fetch(url.href, fetchOptions);
+    if (!response.ok) {
+      throw new Error('Not profilable');
+    }
+    return response.json();
+  } catch (error) {
+    throw new Error('Not profilable');
+  }
 }
 
 function requestAccessToken(

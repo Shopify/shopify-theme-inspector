@@ -27,6 +27,7 @@ chrome.devtools.inspectedWindow.eval(
       }
 
       addEventListenerToButtons();
+      setupNavigationListener();
     }
   },
 );
@@ -49,10 +50,8 @@ function getInspectedWindowURL(): Promise<URL> {
 }
 
 async function refreshPanel() {
-  let node = document.querySelector(selectors.initialMessage)
-  while (node && node.firstChild) {
-    node.removeChild(node.firstChild);
-  }
+  document.querySelector(selectors.initialMessage)!.classList.add('hide');
+  document.querySelector(selectors.speedscopeWrapper)!.classList.add('hide');
   document
     .querySelector(selectors.speedscopeWrapper)!
     .classList.add('loading-fade');
@@ -67,7 +66,7 @@ async function refreshPanel() {
     const speedscopeIframe = document.getElementById('speedscope-iframe') as HTMLIFrameElement;
     speedscopeIframe.contentWindow?.postMessage({ 
       type: 'loadProfile', 
-      profileData: profileData
+      profileData: JSON.stringify(profileData)
     }, '*');
 
     document
@@ -76,7 +75,6 @@ async function refreshPanel() {
 
   } catch (error) {
     console.error(error);
-    document.querySelector(selectors.speedscopeWrapper)!.classList.add('hide');
     document
       .querySelector(selectors.notProfilableMessage)!
       .classList.remove('hide');
@@ -86,4 +84,14 @@ async function refreshPanel() {
   document
     .querySelector(selectors.speedscopeWrapper)!
     .classList.remove('loading-fade');
+}
+
+function setupNavigationListener() {
+  chrome.devtools.network.onNavigated.addListener(() => {
+    // Reset panel to initial state
+    document.querySelector(selectors.speedscopeWrapper)!.classList.add('hide');
+    document.querySelector(selectors.loadingAnimation)!.classList.add('hide');
+    document.querySelector(selectors.notProfilableMessage)!.classList.add('hide');
+    document.querySelector(selectors.initialMessage)!.classList.remove('hide');
+  });
 }
