@@ -21,8 +21,9 @@ async function setSignedInPopup() {
   if (popupSignedIn) popupSignedIn.classList.remove('hide');
   if (popupSignIn) popupSignIn.classList.add('hide');
 
-  const name = await getUserName();
-  popupSignedInPrompt!.textContent = `${name}`;
+  const { name, nickname } = await getUserName();
+  const displayText = nickname ? `${name} (${nickname})` : name;
+  popupSignedInPrompt!.textContent = displayText;
 }
 
 function setSignInPopup() {
@@ -94,7 +95,7 @@ if (signOutButton) {
   });
 }
 
-async function getUserName(): Promise<string> {
+async function getUserName(): Promise<{ name: string; nickname?: string }> {
   const {origin} = await getActiveTabURL();
   return chrome.runtime.sendMessage({
     type: 'request-user-name',
@@ -103,7 +104,10 @@ async function getUserName(): Promise<string> {
     if (response?.error) {
       throw new Error(response.error);
     }
-    return response.name || '';
+    return {
+      name: response.name || '',
+      nickname: response.nickname
+    };
   });
 }
 

@@ -48,6 +48,7 @@ export interface AuthResponse {
 
 export interface UserNameResponse {
   name?: string;
+  nickname?: string;
   error?: string;
 }
 
