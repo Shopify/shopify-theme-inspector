@@ -1,5 +1,9 @@
 # Change Log
 
+## v3.0.2 (Jan. 22, 2025)
+
+- [#155](https://github.com/Shopify/shopify-theme-inspector/pull/155) Fix user name display
+
 ## v3.0.1 (Jan. 22, 2025)
 
 - [#154](https://github.com/Shopify/shopify-theme-inspector/pull/154) Better error handling when the store can't be profiled

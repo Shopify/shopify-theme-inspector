@@ -1,4 +1,5 @@
 export interface UserInfo {
+  nickname: any;
   email: string;
   email_verified: boolean;
   family_name: string;

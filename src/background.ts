@@ -121,8 +121,9 @@ chrome.runtime.onMessage.addListener((message: ChromeMessage, sender, sendRespon
       getOauth2Client(message.origin)
         .getUserInfo()
         .then(userInfo => {
-          const name = userInfo.given_name;
-          sendResponse({name});
+          const name = userInfo.name;
+          const nickname = userInfo.nickname;
+          sendResponse({name: name, nickname: nickname});
         })
         .catch(error => {
           sendResponse({error});
