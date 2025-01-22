@@ -1,7 +1,7 @@
 const extensionId = chrome.runtime.id;
 const prepend = `${extensionId.slice(0, 7)}-`;
 
-export function saveToLocalStorage(key: string, value: string) {
+export function saveToLocalStorage(key: string, value: string): Promise<void> {
   const prependedKey = prepend + key;
 
   return new Promise(resolve => {

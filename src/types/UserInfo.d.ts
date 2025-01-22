@@ -1,4 +1,3 @@
-/* eslint-disable babel/camelcase */
 export interface UserInfo {
   email: string;
   email_verified: boolean;

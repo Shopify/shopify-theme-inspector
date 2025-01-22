@@ -15,18 +15,6 @@
               <span>Load Profile</span>
             </div>
         </button>
-
-        <div class="toolbar__divider"></div>
-
-        <button data-zoom-out-button class="toolbar__button">
-          <span class="toolbar__button-icon toolbar__button-icon--zoom-out">
-            <img inline src="images/zoom-out.svg">
-          </span>
-          <div data-zoom-out-tooltip class="toolbar__tooltip hide">
-            <span>Reset Flamegraph Zoom</span>
-          </div>
-        </button>
-
     </div>
   </div>
 
@@ -43,26 +31,9 @@
     <p>Click <a href="https://github.com/Shopify/shopify-devtools#extension-usage" target="_blank">here</a> to read more about this.</p>
   </div>
 
-  <div data-flamegraph-wrapper class="hide">
-    <div data-flamegraph-container class="chart"></div>
-    <p data-total-time class="total-time">Total time to render liquid: <b>-</b></p>
-    <p data-rendering-backend class="rendering-backend">Rendering back-end: <b>-</b></p>
-
-    <div data-detailed-info class="detailed-info">
-      <p data-partial>File: <b>-</b></p>
-      <p data-node-time>Total Time: <b>-</b></p>
-      <p data-code>
-        Code snippet: <a data-code-anchor href="" target="_blank"><i><span class="code-snippet"></span></i></a>
-        <i data-code-no-anchor class="hide"><span class="code-snippet"></span></i>
-      </p>
-      <p data-line>Line: <b>-</b></p>
-    </div>
-
-    <form class="search">
-      <input data-search-param type="text">
-      <button data-search-button>Search</button>
-      <button data-clear-button>Clear</button>
-    </form>
+  <div data-speedscope-wrapper class="hide">
+    <iframe id="speedscope-iframe" src="speedscope.html"></iframe>
   </div>
+  
 </body>
 </html>

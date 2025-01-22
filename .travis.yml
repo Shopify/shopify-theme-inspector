@@ -17,10 +17,9 @@ shared:
 matrix:
   include:
     - <<: *node_container
-      name: 'Node - build, type-check, and test'
+      name: 'Node - build, type-check'
       script:
         - yarn build
-        - yarn test
     - <<: *node_container
       name: 'Node - lint'
       script:

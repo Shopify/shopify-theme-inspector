@@ -16,10 +16,11 @@
     "noUnusedParameters": true,
     "noUnusedLocals": true,
     "importHelpers": true,
-    "lib": ["dom", "es2015"],
+    "lib": ["dom", "es2015", "ES2017"],
     "strict": true,
     "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "types": ["chrome"]
   },
   "include": ["./src/**/*.ts"],
 }

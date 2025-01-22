@@ -9,15 +9,14 @@ module.exports = {
   resolve: {
     extensions: ['.tsx', '.ts', '.js'],
     fallback: {
-      "stream": require.resolve("stream-browserify"),
-      "crypto": require.resolve('crypto-browserify'),
-      "buffer": require.resolve("buffer")
-    }
+      buffer: require.resolve('buffer'),
+    },
   },
   entry: {
     background: './src/background.ts',
     popup: './src/popup.ts',
     devtools: './src/devtools.ts',
+    speedscope: './src/components/speedscope.ts',
     detectShopify: './src/detectShopify.ts',
   },
   module: {
@@ -49,6 +48,11 @@ module.exports = {
       chunks: ['devtools'],
     }),
     new HtmlWebpackPlugin({
+      filename: 'speedscope.html',
+      template: 'src/resources/speedscope/index.html',
+      chunks: ['speedscope'],
+    }),
+    new HtmlWebpackPlugin({
       filename: 'popupAuthFlow.html',
       template: 'src/popupAuthFlow.html',
       chunks: ['popup'],
@@ -60,14 +64,22 @@ module.exports = {
     }),
     new HtmlWebpackInlineSVGPlugin(),
     new CopyPlugin({
-      patterns: [{
-        from: 'src/manifest.json',
-        force: true
-      }, {
-        from: 'src/images',
-        to: 'images',
-        force: true
-      }],
+      patterns: [
+        {
+          from: 'src/manifest.json',
+          force: true,
+        },
+        {
+          from: 'src/images',
+          to: 'images',
+          force: true,
+        },
+        {
+          from: 'src/resources/speedscope',
+          to: 'speedscope',
+          force: true,
+        },
+      ],
     }),
   ],
   output: {

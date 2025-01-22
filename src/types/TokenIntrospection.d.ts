@@ -1,5 +1,3 @@
-/* eslint-disable babel/camelcase */
-
 export interface TokenIntrospection {
   valid: boolean;
   scope: string;

@@ -1,4 +1,4 @@
-import crypto from 'crypto';
+import { Buffer } from 'buffer';
 import {
   OpenIdConfig,
   ClientAccessToken,
@@ -15,7 +15,10 @@ const OPENID_CONFIG_PATH = '.well-known/openid-configuration.json';
 const TOKEN_EXPIRATION_SAFETY_BUFFER = 60000;
 
 interface Oauth2Options {
-  webAuthFlowOptions: Partial<chrome.identity.WebAuthFlowOptions>;
+  webAuthFlowOptions: {
+    interactive?: boolean;
+    url?: string;
+  };
   clientAuthParams: string[][];
 }
 
@@ -93,12 +96,10 @@ export class Oauth2 {
    * @param scope - The scope we want for the token if we need to request a new one
    */
   public getSubjectAccessToken(
-    destination: string,
     subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
     return this.getValidSubjectAccessTokenAndSave(
-      destination,
       subjectId,
       params,
     );
@@ -229,25 +230,25 @@ export class Oauth2 {
    * Try to get the associated subject access token from storage or request a
    * new token using the provided callback method.
    *
-   * @param destination - Unique ID of the application we're getting a token for
-   * @param scope - The scope of the token
-   * @param cb - A callback which will be used to request a new token if it's not available in storage or via refresh token
+   * @param subjectId - Unique ID of the application we're getting a token for
+   * @param params - Additional params
    */
   private async getValidSubjectAccessTokenAndSave(
-    destination: string,
     subjectId: string,
     params: string[][],
   ): Promise<SubjectAccessToken> {
-    let token = await this.getSubjectAccessTokenFromStorage(destination);
+    // For SFR, we have been storing the token in local storage with key ''.
+    const subjectAccessTokenStorageKey = '';
+    let token = await this.getSubjectAccessTokenFromStorage(subjectAccessTokenStorageKey);
     // If no access token then start new access token flow
     if (typeof token === 'undefined') {
-      token = await this.exchangeToken(destination, subjectId, params);
+      token = await this.exchangeToken(subjectAccessTokenStorageKey, subjectId, params);
     } else if (await this.isAccessTokenInvalid(token)) {
       // If there is an access token but its not valid or expired
-      token = await this.exchangeToken(destination, subjectId, params);
+      token = await this.exchangeToken(subjectAccessTokenStorageKey, subjectId, params);
     }
 
-    await saveToLocalStorage(destination, JSON.stringify(token));
+    await saveToLocalStorage(subjectAccessTokenStorageKey, JSON.stringify(token));
 
     return token;
   }
@@ -296,7 +297,7 @@ export class Oauth2 {
     const {
       secret: codeVerifier,
       hashed: codeChallenge,
-    } = this.generateRandomChallengePair();
+    } = await this.generateRandomChallengePair();
     const config = await this.getConfig();
     const url = new URL(config.authorization_endpoint);
 
@@ -309,6 +310,7 @@ export class Oauth2 {
       ...params,
     ]).toString();
 
+    console.log('Launching web auth flow with URL:', url.href);
     const resultUrl = await this.launchWebAuthFlow(url.href);
     const code = this.extractCode(resultUrl);
     return this.exchangeCodeForToken(code, codeVerifier);
@@ -369,13 +371,10 @@ export class Oauth2 {
 
   /**
    * Check local storage to see if we have a subject token saved.
-   *
-   * @param id - The application id associated to the token we want to get
+   * @param subjectAccessTokenStorageKey - The key in local storage where the subject access token is stored
    */
-  private async getSubjectAccessTokenFromStorage(
-    id: string,
-  ): Promise<SubjectAccessToken | undefined> {
-    const data = await getFromLocalStorage(id);
+  private async getSubjectAccessTokenFromStorage(subjectAccessTokenStorageKey: string): Promise<SubjectAccessToken | undefined> {
+    const data = await getFromLocalStorage(subjectAccessTokenStorageKey);
     if (typeof data === 'undefined') {
       return data;
     }
@@ -487,13 +486,13 @@ export class Oauth2 {
     return new Promise((resolve, reject) => {
       chrome.identity.launchWebAuthFlow(
         {...webAuthFlowOptions, url},
-        callbackURL => {
-          if (chrome.runtime.lastError) {
-            return reject(new Error(chrome.runtime.lastError.message));
+        (callbackURL) => {
+          if (!callbackURL) {
+            reject(new Error('No callback URL returned'));
+          } else {
+            resolve(callbackURL);
           }
-
-          return resolve(callbackURL);
-        },
+        }
       );
     });
   }
@@ -551,9 +550,11 @@ export class Oauth2 {
     return code;
   }
 
-  private generateRandomChallengePair() {
-    const secret = this.base64URLEncode(crypto.randomBytes(32));
-    const hashed = this.base64URLEncode(this.sha256(secret));
+  private async generateRandomChallengePair() {
+    const array = new Uint8Array(32);
+    crypto.getRandomValues(array);
+    const secret = this.base64URLEncode(Buffer.from(array));
+    const hashed = this.base64URLEncode(await this.sha256(secret));
     return {secret, hashed};
   }
 
@@ -569,10 +570,9 @@ export class Oauth2 {
       .replace(/[=]/g, '');
   }
 
-  private sha256(buffer: string) {
-    return crypto
-      .createHash('sha256')
-      .update(buffer)
-      .digest();
+  private async sha256(buffer: string): Promise<Buffer> {
+    const msgBuffer = new TextEncoder().encode(buffer);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+    return Buffer.from(hashBuffer);
   }
 }
